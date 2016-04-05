@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/plugins/OmgevingsAnalyse">
+    <file>img/icon.png</file>
+  </qresource>
+</RCC>
