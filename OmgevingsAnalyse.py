@@ -31,21 +31,13 @@ class OmgevingsAnalyse:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
-        """Constructor.
-
-        :param iface: An interface instance that will be passed to this class
-            which provides the hook by which you can manipulate the QGIS
-            application at run time.
-        :type iface: QgsInterface
-        """
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir, 'i18n', 'OmgevingsAnalyse_{}.qm'.format(locale))
+        locale_path = os.path.join( self.plugin_dir, 'i18n', 'OmgevingsAnalyse_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -60,7 +52,6 @@ class OmgevingsAnalyse:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Omgevings Analyse Rapport')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'OmgevingsAnalyse')
         self.toolbar.setObjectName(u'OmgevingsAnalyse')
 

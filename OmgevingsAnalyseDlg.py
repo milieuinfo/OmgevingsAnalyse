@@ -25,9 +25,10 @@ import os
 from threading import Timer
 from mapTool import mapTool
 from qgis.gui import QgsVertexMarker
-from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsPoint
+from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsMapLayerRegistry, QgsMapLayer
 from ui_OmgevingsAnalyseDlg import Ui_OmgevingsAnalyseDlg
 from PyQt4 import QtGui, QtCore
+from rapportGenerator import rapportGenerator
 
 class OmgevingsAnalyseDlg(QtGui.QDialog):
     def __init__(self, parent=None, iface=None):
@@ -36,7 +37,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.iface = iface
 
         # initialize locale
-        locale = QtCore.QSettings().value("locale/userLocale", "en")
+        locale = QtCore.QSettings().value("locale/userLocale", "nl")
         if not locale:
             locale = 'en'
         else:
@@ -47,17 +48,25 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             self.translator.load(localePath)
             QtCore.QCoreApplication.installTranslator(self.translator)
 
+        #props
+        self.mapTool = None
+        # data
+        self.graphicsLayer = []
+        self.mapLayers = []
+        self.locationName = ""
+
         self._initGui()
 
     def _initGui(self):
         self.ui = Ui_OmgevingsAnalyseDlg()
         self.ui.setupUi(self)
 
-        #data
-        self.graphicsLayer = []
+        self.refreshLayers()
 
         # eventhandlers
         self.ui.manualLocationBtn.clicked.connect(self.manualLocationClicked)
+        self.iface.mapCanvas().layersChanged.connect(self.refreshLayers)
+        self.accepted.connect(self.generateRapport)
 
     def _manualLocationCallback(self, point):
         self._addMarker(point)
@@ -65,7 +74,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         mapCrs = self.iface.mapCanvas().mapSettings().destinationCrs()
         xform = QgsCoordinateTransform(mapCrs, lam72)
         self.location = xform.transform(point)
-        self.ui.manualLocationTxt.setText( "{0:.2f} - {1:.2f}".format( self.location.x(), self.location.y()) )
+        self.locationName = "{0:.2f} - {1:.2f}".format( self.location.x(), self.location.y())
+        self.ui.manualLocationTxt.setText( self.locationName )
         Timer(3, self._clearGraphicLayer, ()).start()
 
         self.showNormal()
@@ -87,7 +97,29 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             self.iface.mapCanvas().scene().removeItem(graphic)
         self.graphicsLayer = []
 
+    def refreshLayers(self):
+        self.mapLayers = [ n for n in QgsMapLayerRegistry.instance().mapLayers().values()
+                             if n.type() == QgsMapLayer.VectorLayer ]
+
+        for mapLayer in self.mapLayers:
+            item = QtGui.QListWidgetItem( mapLayer.name() , self.ui.layerList)
+            item.setCheckState(0)
+            self.ui.layerList.addItem(item)
+
     #events
+    def generateRapport(self):
+        checkedLayerNames = [self.ui.layerList.item(n).text() for n in range(self.ui.layerList.count() )
+                                                              if self.ui.layerList.item(n).checkState()]
+        lyrs = [ m for m in self.mapLayers if m.name() in checkedLayerNames ]
+
+        rap = rapportGenerator( self.iface, "Rapport", self.locationName, self.ui.searchRaduisNum.value() )
+
+        for lyr in lyrs:
+            rap.addLayer( lyr.name() , 10, {"attr":"test","id":15} )
+        rap.show()
+
+        print  rap.toString()
+
     def manualLocationClicked(self):
         self.mapTool = mapTool(self.iface, self._manualLocationCallback)
         self.iface.mapCanvas().setMapTool(self.mapTool)

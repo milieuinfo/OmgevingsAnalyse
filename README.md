@@ -1,33 +1,45 @@
-Plugin Builder Results
+Omgevings analyse tool - rapporteertool voor milieuvergunningen
+====
 
-Your plugin OmgevingsAnalyse was created in:
-    C:\Users\k.warrie\Projects\OmgevingsAnalyse\OmgevingsAnalyse
+Ontwikkelen van een vereenvoudigd QGIS project met specifieke functionaliteit
+----
 
-Your QGIS plugin directory is located at:
-    C:/Users/k.warrie/.qgis2/python/plugins
+De bedoeling is om 1 toolbar te maken specifiek voor dit project: Functionaliteiten van de toolbar:
 
-What's Next:
+- zoeken op perceel of adres worden --> zoeken op adres is vrij eenvoudig
+- een select perceel knop waarbij één of meerdere percelen geselecteerd worden uit de CADMAP (ter beschikking als WFS service binnen MercatorNet) --> voor identify of ???
+- of de GRB ADP percelenkaart (die zou dan lokaal moeten geïnstalleerd worden. (percelenkaart pas zichtbaar op 1/2500) --> Lokale data s af te raden, GRB is te groot --> Werken met GRB-WMS indien mogelijk
+- zoom in/uit , pan --> standaard
+- meet afstand knop --> standaard
+- genereer rapport knop --> in html, met opslaan knop
+- kies basiskaart dropdown --> of radiobutton
 
-  * Copy the entire directory containing your new plugin to the QGIS plugin
-    directory
+Functionaliteit genereer rapport knop
+----
 
-  * Compile the resources file using pyrcc4
+Ten opzichte van de verschillende vector lagen (groot aantal) die ingeladen zijn in het project (WFS of vectorlaag) 
+een soort rapport venster gegenereerd wordt met volgende informatie:
 
-  * Run the tests (``make test``)
+- Welke afstand de geselcteerde perce(e)l(en)de tot de dichtsbijgelegen polygonen/punten/of lijnen van de verschillende vectorlagen gelegen zijn: 
+- Afstand dichtbijgelegen object
+- Bekijk op kaart toon attrubten dichstbijgelegen feature Ven gebieden —— 1500m knop: bekijk op kaart toon attributen Vogelrichtlijngebieden —— 750m
+- knop: bekijk op kaart toon attributen Seveso terreinen —— 3500m knop: bekijk op kaart toon attributen 
+- Voor rasterlagen:
+    - de knop 'toon op kaart' zou dan het kaartvenster aanpassen naar:
+    - achtergrondkaart: bv GRB of Orthofoto's
+    - geselecteerde percelen
+    - enkel laag zichtbaar maken waarin men geïnteresseerd is
+    - de toon attribuutwaarde geeft de attributen van de dichtsbijgelegen punt/lijn/polygoon van de kaart --> Rasterlagen als WMS ?
+    
+Het zou goed zijn moest het project generiek kunnen geconfigureerd worden worden. 
+Je kan dan als beheerder de vector (bv vector of WFS, raster of WMS WMTS en de percelen of dossierskaart inladen, 
+alle panelen en toolbars verwijderen en de configuratie maken. In een configuratievenster voor een soort beheerder kan je dan :
 
-  * Test the plugin by enabling it in the QGIS plugin manager
+- de verschillende basiskaarten aanduiden
+- de laag in de percelen geselecteerd worden
+- de vectorlagen waartegen de afstand moet berekend worden
+- de rasterlagen die enkel getoond worden
 
-  * Customize it by editing the implementation file: ``OmgevingsAnalyse.py``
-
-  * Create your own custom icon, replacing the default icon.png
-
-  * Modify your user interface by opening OmgevingsAnalyse.ui in Qt Designer
-
-  * You can use the Makefile to compile your Ui and resource files when
-    you make changes. This requires GNU make (gmake)
-
-For more information, see the PyQGIS Developer Cookbook at:
-http://www.qgis.org/pyqgis-cookbook/index.html
-
-(C) 2011-2014 GeoApt LLC - geoapt.com
-Git revision : $Format:%H$
+Uitwerking
+----
+De rapporteertool kan ontwikkelt als een QGIS plugin, de configuratie kan een gewoon QGIS-project zijn. 

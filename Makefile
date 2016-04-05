@@ -46,7 +46,7 @@ PY_FILES = \
 	__init__.py \
 	OmgevingsAnalyse.py OmgevingsAnalyseDlg.py
 
-UI_FILES = ui_OmgevingsAnalyseDlg.py
+UI_FILES = ui_OmgevingsAnalyseDlg.py ui_resultDlg.py
 
 EXTRAS = metadata.txt img
 

@@ -223,6 +223,7 @@ pip-log.txt
 #Translations
 *.mo
 
+ui_*.py
 
 .idea/
 doc/*.pdf
