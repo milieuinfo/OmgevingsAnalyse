@@ -52,7 +52,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         # data
         self.graphicsLayer = []
         self.mapLayers = []
-        self.location = None
+        self.loc_lam72 = None
         self.locationName = ""
         self.lam72 = QgsCoordinateReferenceSystem(31370)
 
@@ -69,15 +69,14 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.iface.mapCanvas().layersChanged.connect(self.refreshLayers)
         self.accepted.connect(self.generateRapport)
 
-
     def _manualLocationCallback(self, point):
         mkr = utils.addMarker(self.iface, point)
         self.graphicsLayer.append(mkr)
 
         #set location an and location name
         xform = QgsCoordinateTransform( self.iface.mapCanvas().mapSettings().destinationCrs(), self.lam72)
-        self.location = QgsGeometry.fromPoint(point)
-        self.location.transform( xform )
+        self.loc_lam72 = QgsGeometry.fromPoint(point)
+        self.loc_lam72.transform(xform)
         self.locationName = "{0:.2f} - {1:.2f}".format( point.x(), point.y())
 
         self.ui.manualLocationTxt.setText( self.locationName )
@@ -94,7 +93,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
     def refreshLayers(self):
         self.mapLayers = [ n for n in QgsMapLayerRegistry.instance().mapLayers().values()
-                             if n.type() == QgsMapLayer.VectorLayer ]
+                             if n.type() == QgsMapLayer.VectorLayer and  n.geometryType() != QGis.NoGeometry ]
         self.ui.layerList.clear()
         for mapLayer in self.mapLayers:
             item = QtGui.QListWidgetItem( mapLayer.name() , self.ui.layerList)
@@ -103,38 +102,35 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
     #events
     def generateRapport(self):
-        if self.location is None: return
+        if self.loc_lam72 is None: return
 
         radius = self.ui.searchRaduisNum.value()
-        searchRect = self.location.buffer( radius, 100 ).boundingBox()
+        rapportTitle = self.ui.rapportTitleTxt.text()
         checkedLayerNames = [self.ui.layerList.item(n).text() for n in range(self.ui.layerList.count() )
-                                                              if self.ui.layerList.item(n).checkState()]
+                                                              if self.ui.layerList.item(n).checkState() ]
         lyrs = [ m for m in self.mapLayers if m.name() in checkedLayerNames ]
 
-        rap     = rapportGenerator( self.iface, "Rapport", self.locationName, radius )
-        request = QgsFeatureRequest(searchRect)
+        rap = rapportGenerator( self.iface, rapportTitle, self.locationName, radius )
 
         for lyr in lyrs:
-            feats = lyr.getFeatures(request)
-            minDist = sys.float_info.max
-            attr = {}
-            counter = 0
-            for feat in feats:
-                counter += 1
+            index = QgsSpatialIndex( lyr.getFeatures() )
 
+            loc = self.loc_lam72.centroid()
+            loc.transform(QgsCoordinateTransform( self.lam72,  lyr.crs()) )
+
+            nearest = index.nearestNeighbor(loc.asPoint(), 1)
+
+            if len(nearest) > 0:
+                lyr.setSelectedFeatures( [nearest[0] ] )
+                feat = lyr.selectedFeatures()[0]
                 geom = feat.geometry()
-                if geom is None: continue
-                geom.transform( QgsCoordinateTransform( lyr.crs() , self.lam72) )
-                dist = geom.distance( self.location )
+                dist = geom.distance( loc )
+                if dist > radius:
+                    lyr.setSelectedFeatures([])
+                    continue
 
-                # print "{0} {1} {2}".format(counter, geom.centroid().exportToWkt(), self.location.exportToWkt())
-                if dist < minDist:
-                   print dist
-                   minDist = dist
-                   attr =  utils.feat2dict( feat )
-
-            if minDist < sys.float_info.max:
-                rap.addLayer( lyr.name(), minDist, attr )
+                attr = utils.feat2dict(feat)
+                rap.addLayer(lyr.name(), dist, attr)
         rap.show()
 
     def manualLocationClicked(self):

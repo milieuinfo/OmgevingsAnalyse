@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as ET
 from ui_resultDlg import Ui_ResultDlg
-from PyQt4.QtGui import QDialog, QMessageBox
+from PyQt4.QtGui import QDialog, QMessageBox, QFileDialog
 from  PyQt4.QtCore import QObject, pyqtSlot
 
 class rapportGenerator:
@@ -24,7 +24,7 @@ class rapportGenerator:
         lyr = ET.SubElement(self.layers, "li" )
         ET.SubElement( lyr, "h2" ).text = layerName
         ET.SubElement( lyr, "div").text = "Afstand tot object {0} : {1:.2f} meter".format(self.locationName, dist)
-        ET.SubElement(lyr, "h3").text = "Attributen: "
+        ET.SubElement( lyr, "h3").text = "Attributen: "
 
         table = ET.SubElement( lyr, 'table', {'border':'1px solid black'} )
 
@@ -42,7 +42,11 @@ class rapportGenerator:
         myObj = htmlInteraction()
         ui.webView.page().mainFrame().addToJavaScriptWindowObject("pyObj", myObj)
         dlg.show()
-        dlg.exec_()
+        result = dlg.exec_()
+        if result:
+            filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
+                                                   "Opslaan als", None, "WORD (*.DOC);;HTML (*.html)" )
+            if filename: self.save(filename)
 
     def toString(self):
         return ET.tostring(self.root)
