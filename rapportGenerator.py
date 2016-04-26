@@ -1,33 +1,37 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as ET
 from ui_resultDlg import Ui_ResultDlg
-from PyQt4.QtGui import QDialog, QMessageBox, QFileDialog
-from  PyQt4.QtCore import QObject, pyqtSlot
+from PyQt4.QtGui import QDialog, QFileDialog
+from htmlInteraction import htmlInteraction, magnifyingGlass
 
 class rapportGenerator:
     def __init__(self, iface, rapportName="", locationName="", searchRadius=100):
         self.iface = iface
-        self.root = ET.Element("body")
+        self.body = ET.Element("body")
         self.rapportName  = rapportName
         self.locationName = locationName
         self.searchRadius = searchRadius
 
-        ET.SubElement(self.root, "h1" ).text = rapportName
-        ET.SubElement(self.root, "div").text = "Informatatie met betrekking tot de locatie: {0}".format(locationName)
-        ET.SubElement(self.root, "div").text = "Meeste nabije objecten gelegen binnen zoekstraal van {0:.1f} meter:".format(searchRadius)
+        ET.SubElement(self.body, "h1").text = rapportName
+        ET.SubElement(self.body, "div").text = "Informatatie met betrekking tot de locatie: {0}".format(locationName)
+        ET.SubElement(self.body, "div").text = "Meeste nabije objecten gelegen binnen zoekstraal van {0:.1f} meter:".format(searchRadius)
 
-        #ET.SubElement(self.root, "button", {"onClick" : "pyObj.showMessage('Hello from WebKit')" } ).text = "OK"
+        self.layers = ET.SubElement(self.body, "ol")
 
-        self.layers = ET.SubElement(self.root, "ol" )
+    def addLayer(self, layerName, attrs, dist=0, x=0, y=0 ):
+        lyr = ET.SubElement(self.layers, "li", {"style" : "display:inline-block;"} )
 
-    def addLayer(self, layerName="" , dist=0, attrs= {} ):
-        lyr = ET.SubElement(self.layers, "li" )
         ET.SubElement( lyr, "h2" ).text = layerName
-        ET.SubElement( lyr, "div").text = "Afstand tot object {0} : {1:.2f} meter".format(self.locationName, dist)
+        if x > 0 and y > 0:
+           btn = ET.SubElement(lyr, "button", {"onClick": "pyObj.moveMapTo({0}, {1}, 0)".format(x, y)})
+           svg = ET.fromstring( magnifyingGlass )
+           btn.append( svg )
+
+        msg = ET.SubElement( lyr, "span")
+        msg.text = "Afstand tot object {0} : {1:.2f} meter".format(self.locationName, dist)
+
         ET.SubElement( lyr, "h3").text = "Attributen: "
-
         table = ET.SubElement( lyr, 'table', {'border':'1px solid black'} )
-
         for key, val in attrs.items():
             row = ET.SubElement( table, "tr" )
             ET.SubElement(row, 'th', {'style':'text-align: left;'}).text = key
@@ -39,7 +43,7 @@ class rapportGenerator:
         ui = Ui_ResultDlg()
         ui.setupUi( dlg )
         ui.webView.setHtml(self.toString())
-        myObj = htmlInteraction()
+        myObj = htmlInteraction( self.iface )
         ui.webView.page().mainFrame().addToJavaScriptWindowObject("pyObj", myObj)
         dlg.show()
         result = dlg.exec_()
@@ -49,14 +53,15 @@ class rapportGenerator:
             if filename: self.save(filename)
 
     def toString(self):
-        return ET.tostring(self.root)
+        return ET.tostring(self.body)
 
     def save(self, path):
-        tree = ET.ElementTree(self.root)
+        #remove buttons
+        for node in self.layers:
+            for child in node:
+                if child.tag == "button": node.remove( child )
+
+        tree = ET.ElementTree(self.body)
         tree.write( path )
 
-class htmlInteraction(QObject):
-    @pyqtSlot(str)
-    def showMessage(self, msg, title="info"):
-        """Open a message box and display the specified message."""
-        QMessageBox.information(None, title, msg)
+

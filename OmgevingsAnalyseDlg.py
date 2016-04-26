@@ -110,6 +110,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                                                               if self.ui.layerList.item(n).checkState() ]
         lyrs = [ m for m in self.mapLayers if m.name() in checkedLayerNames ]
 
+        mapCrs = self.iface.mapCanvas().mapSettings().destinationCrs()
+
         rap = rapportGenerator( self.iface, rapportTitle, self.locationName, radius )
 
         for lyr in lyrs:
@@ -129,8 +131,11 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                     lyr.setSelectedFeatures([])
                     continue
 
+                center = geom.centroid()
+                center.transform( QgsCoordinateTransform(lyr.crs(), mapCrs) )
+
                 attr = utils.feat2dict(feat)
-                rap.addLayer(lyr.name(), dist, attr)
+                rap.addLayer(lyr.name(), attr, dist, center.asPoint().x(), center.asPoint().y() )
         rap.show()
 
     def manualLocationClicked(self):
