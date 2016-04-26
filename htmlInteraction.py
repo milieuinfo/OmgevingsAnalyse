@@ -19,14 +19,13 @@ class htmlInteraction(QObject):
         pnt = QgsPoint(x, y)
         self.iface.mapCanvas().setCenter(pnt)
         self.iface.mapCanvas().zoomByFactor(zoom)
-        self.iface.mapCanvas().setDirty(0)
+        self.iface.mapCanvas().refresh()
 
     @pyqtSlot(float, float, float, float)
     def zoomToRect(self, xmin, ymin, xmax, ymax):
         rec = QgsRectangle( xmin, ymin, xmax, ymax )
         self.iface.mapCanvas().setExtent(rec)
-        self.iface.mapCanvas().setDirty(0)
-
+        self.iface.mapCanvas().refresh()
 
 #Hard coded html and svg code
 magnifyingGlass = """<svg height="18" width="18">

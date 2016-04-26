@@ -13,9 +13,10 @@ De volgende informatie wordt weergegeven:
 - Toon de attributen van dichstbijgelegen feature
 - Knop bekijk op kaart /zoon naar in rapport.
 - De dichtbijzijnde objecten worden geselecteerd zodat ze op de kaart in de attribuuttable terug te vinden zijn.  
+- Export van rapport naar een document dat in MS Word kan geopend worden.
 
-Uitwerking
-----
+Werking
+-------
 De rapporteertool kan ontwikkelt als een QGIS plugin, de configuratie kan een gewoon QGIS-project zijn. 
 Veel gevraagde zaken zijn in principe gewoon standaard QGIS functionaliteit. 
 Speficieke knoppen uitschakellen oof zichtbaar maken is mogelijk in QGIS.

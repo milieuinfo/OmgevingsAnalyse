@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>496</width>
-    <height>548</height>
+    <width>470</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,15 +26,15 @@
     </widget>
    </item>
    <item>
-    <widget class="QTabWidget" name="intputLocationTabs">
+    <widget class="QTabWidget" name="inputLocationTabs">
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>120</height>
+       <height>200</height>
       </size>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="manualLocationTab">
       <attribute name="title">
@@ -51,7 +51,7 @@
        <item>
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>Aangeklikte locatie:</string>
+          <string>Gekozen locatie:</string>
          </property>
         </widget>
        </item>
@@ -68,6 +68,19 @@
          </property>
         </widget>
        </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="adresLocationTab">
@@ -76,11 +89,46 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>TODO</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Adres:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="adresInputText">
+           <property name="placeholderText">
+            <string>&lt;straat&gt; &lt;huisnr&gt; , &lt;gemeente of postcode&gt;</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QListWidget" name="adresSelectionList"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>Gekozen locatie:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="adresLocationTxt">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="placeholderText">
+            <string>&lt;x&gt; - &lt;y&gt; , &lt;adres&gt;</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

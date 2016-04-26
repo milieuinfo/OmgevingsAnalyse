@@ -21,13 +21,14 @@
  ***************************************************************************/
 """
 
-import os, utils, sys
+import os, utils
 from threading import Timer
 from mapTool import mapTool
 from qgis.core import *
 from ui_OmgevingsAnalyseDlg import Ui_OmgevingsAnalyseDlg
 from PyQt4 import QtGui, QtCore
 from rapportGenerator import rapportGenerator
+from geopunt import Adres
 
 class OmgevingsAnalyseDlg(QtGui.QDialog):
     def __init__(self, parent=None, iface=None):
@@ -52,8 +53,10 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         # data
         self.graphicsLayer = []
         self.mapLayers = []
-        self.loc_lam72 = None
-        self.locationName = ""
+        self.manualLoc_lam72 = None
+        self.adresLoc_lam72 = None
+        self.adresLocName = ""
+        self.manualLocationName = ""
         self.lam72 = QgsCoordinateReferenceSystem(31370)
 
         self._initGui()
@@ -64,8 +67,14 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         self.refreshLayers()
 
+        self.gp  = Adres()
+
         # eventhandlers
         self.ui.manualLocationBtn.clicked.connect(self.manualLocationClicked)
+        self.ui.adresInputText.textEdited.connect(self.adresTextEdited)
+        self.ui.adresSelectionList.itemActivated.connect(self.setAdresLocation)
+        self.ui.adresSelectionList.currentItemChanged.connect(self.setAdresLocation)
+
         self.iface.mapCanvas().layersChanged.connect(self.refreshLayers)
         self.accepted.connect(self.generateRapport)
 
@@ -75,11 +84,12 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         #set location an and location name
         xform = QgsCoordinateTransform( self.iface.mapCanvas().mapSettings().destinationCrs(), self.lam72)
-        self.loc_lam72 = QgsGeometry.fromPoint(point)
-        self.loc_lam72.transform(xform)
-        self.locationName = "{0:.2f} - {1:.2f}".format( point.x(), point.y())
 
-        self.ui.manualLocationTxt.setText( self.locationName )
+        self.manualLoc_lam72 = QgsGeometry.fromPoint(point)
+        self.manualLoc_lam72.transform(xform)
+        self.manualLocationName = "{0:.2f} - {1:.2f}".format(point.x(), point.y())
+
+        self.ui.manualLocationTxt.setText(self.manualLocationName)
         Timer(3, self._clearGraphicLayer, ()).start()
 
         self.showNormal()
@@ -101,8 +111,42 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             self.ui.layerList.addItem(item)
 
     #events
+    def adresTextEdited(self):
+        partialAdres = self.ui.adresInputText.text()
+        adresSuggestions = self.gp.fetchSuggestion( partialAdres, 20 )
+        if type(adresSuggestions) is list:
+            self.ui.adresSelectionList.clear()
+            self.ui.adresLocationTxt.setText("")
+            self.ui.adresSelectionList.addItems(adresSuggestions)
+
+    def setAdresLocation(self):
+        selItems =  self.ui.adresSelectionList.selectedItems()
+        # noinspection PyArgumentList
+        if len(selItems):
+            self.adresLocName =  selItems[0].text()
+
+            locs = self.gp.fetchLocation(self.adresLocName ,1)
+            if len(locs) < 1:
+                raise Exception("Adres not found: " + self.adresLocName)
+
+            xlb, ylb = locs[0]["Location"]["X_Lambert72"], locs[0]["Location"]["Y_Lambert72"]
+
+            self.adresLoc_lam72 =  QgsGeometry.fromPoint( QgsPoint(xlb, ylb) )
+            self.ui.adresLocationTxt.setText( "{0:.0f} - {1:.0f}, {2}".format( xlb, ylb, self.adresLocName) )
+
     def generateRapport(self):
-        if self.loc_lam72 is None: return
+        if self.ui.inputLocationTabs.currentIndex() == 0:
+            loc_lam72 = self.manualLoc_lam72
+            title = self.manualLocationName
+            print "manual"
+        elif self.ui.inputLocationTabs.currentIndex() == 1:
+            loc_lam72 = self.adresLoc_lam72
+            title = self.adresLocName
+            print "adres"
+        else:
+            return
+
+        if loc_lam72 is None: return
 
         radius = self.ui.searchRaduisNum.value()
         rapportTitle = self.ui.rapportTitleTxt.text()
@@ -112,12 +156,12 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         mapCrs = self.iface.mapCanvas().mapSettings().destinationCrs()
 
-        rap = rapportGenerator( self.iface, rapportTitle, self.locationName, radius )
+        rap = rapportGenerator(self.iface, rapportTitle, title, radius)
 
         for lyr in lyrs:
             index = QgsSpatialIndex( lyr.getFeatures() )
 
-            loc = self.loc_lam72.centroid()
+            loc = loc_lam72.centroid()
             loc.transform(QgsCoordinateTransform( self.lam72,  lyr.crs()) )
 
             nearest = index.nearestNeighbor(loc.asPoint(), 1)
