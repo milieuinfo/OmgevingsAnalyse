@@ -1,44 +1,18 @@
 Omgevings analyse tool - rapporteertool voor milieuvergunningen
 ================================================================
 
-**LNE vroeg een tool die het volgende kan:**
+Op vraag van LNE werdt een tool ontwikeld een omgevingsrapport van locatie maakt. 
 
-### Ontwikkelen van een vereenvoudigd QGIS project met specifieke functionaliteit
+Ten opzichte van de verschillende vector lagen, die ingeladen zijn in het project (WFS of vectorlaag) 
+wordt een soort rapport gegenereerd wordt voor een specifieke locatie:
 
-De bedoeling is om 1 toolbar te maken specifiek voor dit project: Functionaliteiten van de toolbar:
+De gebruiker kan een locatie op de kaart aanklikken of een adres of perceel selecteren. (TODO)
 
-- zoeken op perceel of adres worden --> zoeken op adres is vrij eenvoudig
-- een select perceel knop waarbij één of meerdere percelen geselecteerd worden uit de CADMAP (ter beschikking als WFS service binnen MercatorNet) --> voor identify of ???
-- of de GRB ADP percelenkaart (die zou dan lokaal moeten geïnstalleerd worden. (percelenkaart pas zichtbaar op 1/2500) --> Lokale data s af te raden, GRB is te groot --> Werken met GRB-WMS indien mogelijk
-- zoom in/uit , pan --> standaard
-- meet afstand knop --> standaard
-- genereer rapport knop --> in html, met opslaan knop
-- kies basiskaart dropdown --> of radiobutton
-
-### Functionaliteit genereer rapport knop
-
-Ten opzichte van de verschillende vector lagen (groot aantal) die ingeladen zijn in het project (WFS of vectorlaag) 
-een soort rapport venster gegenereerd wordt met volgende informatie:
-
-- Welke afstand de geselcteerde perce(e)l(en)de tot de dichtsbijgelegen polygonen/punten/of lijnen van de verschillende vectorlagen gelegen zijn: 
-- Afstand dichtbijgelegen object
-- Bekijk op kaart toon attributen dichstbijgelegen feature Ven gebieden —— 1500m knop: bekijk op kaart toon attributen Vogelrichtlijngebieden —— 750m
-- Knop: bekijk op kaart toon attributen Seveso terreinen —— 3500m knop: bekijk op kaart toon attributen 
-- Voor rasterlagen:
-    - de knop 'toon op kaart' zou dan het kaartvenster aanpassen naar:
-    - achtergrondkaart: bv GRB of Orthofoto's
-    - geselecteerde percelen
-    - enkel laag zichtbaar maken waarin men geïnteresseerd is
-    - de toon attribuutwaarde geeft de attributen van de dichtsbijgelegen punt/lijn/polygoon van de kaart --> Rasterlagen als WMS ?
-    
-Het zou goed zijn moest het project generiek kunnen geconfigureerd worden worden. 
-Je kan dan als beheerder de vector (bv vector of WFS, raster of WMS WMTS en de percelen of dossierskaart inladen, 
-alle panelen en toolbars verwijderen en de configuratie maken. In een configuratievenster voor een soort beheerder kan je dan :
-
-- de verschillende basiskaarten aanduiden
-- de laag in de percelen geselecteerd worden
-- de vectorlagen waartegen de afstand moet berekend worden
-- de rasterlagen die enkel getoond worden
+De volgende informatie wordt weergegeven:
+- Welke afstand de geslecteerde locatie tot de dichtsbijgelegen object van de verschillende vectorlagen gelegen zijn.
+- Toon de attributen van dichstbijgelegen feature
+- Knop bekijk op kaart /zoon naar in rapport.
+- De dichtbijzijnde objecten worden geselecteerd zodat ze op de kaart in de attribuuttable terug te vinden zijn.  
 
 Uitwerking
 ----

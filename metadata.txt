@@ -10,14 +10,14 @@
 name=Omgevings Analyse Rapport
 qgisMinimumVersion=2.0
 description=Maak een rapport over de omgeving van een adres, perceel of punt
-version=0.1
+version=0.2
 author=Kay Warrie
 email=kaywarrie@gmail.com
 
 about=Maak een rapport over de omgeving van een adres, perceel of punt.
 
-tracker=xxx
-repository=xx
+tracker=https://github.com/milieuinfo/OmgevingsAnalyse/issues
+repository=https://github.com/milieuinfo/OmgevingsAnalyse
 # End of mandatory metadata
 
 # Recommended items:
@@ -28,7 +28,7 @@ repository=xx
 # Tags are comma separated with spaces allowed
 tags=
 
-homepage=xxx
+homepage=http://www.milieuinfo.be/
 category=Plugins
 icon=img/icon.png
 # experimental flag
