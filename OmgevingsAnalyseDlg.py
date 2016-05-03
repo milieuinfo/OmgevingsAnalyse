@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 
-import os, utils
+import os, utils, sys
 from threading import Timer
 from mapTool import mapTool
 from qgis.core import *
@@ -79,9 +79,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.accepted.connect(self.generateRapport)
 
     def _manualLocationCallback(self, point):
-        mkr = utils.addMarker(self.iface, point)
-        self.graphicsLayer.append(mkr)
-
         #set location an and location name
         xform = QgsCoordinateTransform( self.iface.mapCanvas().mapSettings().destinationCrs(), self.lam72)
 
@@ -90,7 +87,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.manualLocationName = "{0:.2f} - {1:.2f}".format(point.x(), point.y())
 
         self.ui.manualLocationTxt.setText(self.manualLocationName)
-        Timer(3, self._clearGraphicLayer, ()).start()
+
+        self.flashMarker(point)
 
         self.showNormal()
         self.activateWindow()
@@ -121,7 +119,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
     def setAdresLocation(self):
         selItems =  self.ui.adresSelectionList.selectedItems()
-        # noinspection PyArgumentList
         if len(selItems):
             self.adresLocName =  selItems[0].text()
 
@@ -134,15 +131,16 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             self.adresLoc_lam72 =  QgsGeometry.fromPoint( QgsPoint(xlb, ylb) )
             self.ui.adresLocationTxt.setText( "{0:.0f} - {1:.0f}, {2}".format( xlb, ylb, self.adresLocName) )
 
+            xform = QgsCoordinateTransform( self.lam72, self.iface.mapCanvas().mapSettings().destinationCrs() )
+            self.flashMarker( xform.transform( xlb, ylb ) )
+
     def generateRapport(self):
         if self.ui.inputLocationTabs.currentIndex() == 0:
             loc_lam72 = self.manualLoc_lam72
             title = self.manualLocationName
-            print "manual"
         elif self.ui.inputLocationTabs.currentIndex() == 1:
             loc_lam72 = self.adresLoc_lam72
             title = self.adresLocName
-            print "adres"
         else:
             return
 
@@ -164,25 +162,52 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             loc = loc_lam72.centroid()
             loc.transform(QgsCoordinateTransform( self.lam72,  lyr.crs()) )
 
-            nearest = index.nearestNeighbor(loc.asPoint(), 1)
+            # the 10 nearest features according to the index
+            nearest = index.nearestNeighbor(loc.asPoint(), 10)
+            if len(nearest) == 0: continue
 
-            if len(nearest) > 0:
-                lyr.setSelectedFeatures( [nearest[0] ] )
-                feat = lyr.selectedFeatures()[0]
+            Distance = sys.float_info.max # maximum float
+            Geometry = None
+            Features = None
+            nearestID = []
+
+            #find the nearest feature, maximum 10 iterations
+            for FID in nearest:
+                feat = [f for f in lyr.getFeatures( QgsFeatureRequest(FID) ) ][0]
                 geom = feat.geometry()
-                dist = geom.distance( loc )
-                if dist > radius:
-                    lyr.setSelectedFeatures([])
-                    continue
+                # if loc within polygon then dist = 0 and search is over
+                if loc.within( geom ):
+                    Distance = 0
+                    Geometry = geom
+                    Features = feat
+                    nearestID = [FID]
+                    break
+                else:
+                    dist = geom.distance( loc )
+                    if dist < Distance:
+                        Distance = dist
+                        Geometry = geom
+                        Features = feat
+                        nearestID = [FID]
 
-                center = geom.centroid()
-                center.transform( QgsCoordinateTransform(lyr.crs(), mapCrs) )
+            if Distance > radius or Geometry is None: continue
 
-                attr = utils.feat2dict(feat)
-                rap.addLayer(lyr.name(), attr, dist, center.asPoint().x(), center.asPoint().y() )
+            lyr.setSelectedFeatures(nearestID)
+            bbox = Geometry.buffer(1 ,4) # buffer with 4 vertices = boundingbox
+            bbox.transform( QgsCoordinateTransform(lyr.crs(), mapCrs) )
+            xmin, ymin, xmax, ymax = [ bbox.boundingBox().xMinimum() , bbox.boundingBox().yMinimum() ,
+                                       bbox.boundingBox().xMaximum() , bbox.boundingBox().yMaximum() ]
+            attr = utils.feat2dict(Features)
+            rap.addLayer(lyr.name(), attr, Distance, xmin, ymin, xmax, ymax )
         rap.show()
 
     def manualLocationClicked(self):
         self.mapTool = mapTool(self.iface, self._manualLocationCallback)
         self.iface.mapCanvas().setMapTool(self.mapTool)
         self.showMinimized()
+
+    def flashMarker(self, point, time=3):
+        """Add marker and remove it after time in sec"""
+        mkr = utils.addMarker(self.iface, point)
+        self.graphicsLayer.append(mkr)
+        Timer(time, self._clearGraphicLayer, ()).start()

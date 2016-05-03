@@ -3,6 +3,7 @@ from qgis.core import  *
 from qgis.gui import *
 from PyQt4 import QtGui
 
+
 def feat2dict( feature ):
     featDict = {}
     featList = [ n.name() for n in  feature.fields().toList()]
@@ -23,11 +24,11 @@ def where(layer, exp):
             yield feature
 
 
-def addMarker(iface, pnt, clr=QtGui.QColor(255, 255, 0)):
+def addMarker(iface, pnt, clr=QtGui.QColor(0, 255, 0), ico=QgsVertexMarker.ICON_BOX ):
     m = QgsVertexMarker(iface.mapCanvas())
     m.setCenter(pnt)
     m.setColor(clr)
     m.setIconSize(1)
-    m.setIconType(QgsVertexMarker.ICON_BOX)
+    m.setIconType(ico)
     m.setPenWidth(9)
     return m

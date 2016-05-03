@@ -159,7 +159,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Zoekstraal:</string>
+        <string>Maximale zoekstraal:</string>
        </property>
       </widget>
      </item>

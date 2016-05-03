@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as ET
 from ui_resultDlg import Ui_ResultDlg
+from PyQt.QtCore import QDateTime, QDate
 from PyQt4.QtGui import QDialog, QFileDialog
 from htmlInteraction import htmlInteraction, magnifyingGlass
 
@@ -18,12 +19,18 @@ class rapportGenerator:
 
         self.layers = ET.SubElement(self.body, "ol")
 
-    def addLayer(self, layerName, attrs, dist=0, x=0, y=0 ):
+    def addLayer(self, layerName, attrs, dist=0, xmin=0, ymin=0, xmax=0, ymax=0):
         lyr = ET.SubElement(self.layers, "li", {"style" : "display:inline-block;"} )
 
         ET.SubElement( lyr, "h2" ).text = layerName
-        if x > 0 and y > 0:
-           btn = ET.SubElement(lyr, "button", {"onClick": "pyObj.moveMapTo({0}, {1}, 0)".format(x, y)})
+
+        if xmin > 0 and ymin > 0 and xmax > 0 and ymax > 0:
+           btn = ET.SubElement(lyr, "button", {"onClick": "pyObj.zoomToRect({0}, {1}, {2}, {3})".format(xmin, ymin, xmax, ymax)})
+           svg = ET.fromstring(magnifyingGlass)
+           btn.append(svg)
+
+        elif xmin > 0 and ymin > 0:
+           btn = ET.SubElement(lyr, "button", {"onClick": "pyObj.moveMapTo({0}, {1}, 0)".format(xmin, ymin)})
            svg = ET.fromstring( magnifyingGlass )
            btn.append( svg )
 
@@ -35,7 +42,12 @@ class rapportGenerator:
         for key, val in attrs.items():
             row = ET.SubElement( table, "tr" )
             ET.SubElement(row, 'th', {'style':'text-align: left;'}).text = key
-            if isinstance(val, unicode): ET.SubElement(row, 'td').text = val.encode('ascii','replace')
+            if isinstance(val, unicode):
+                ET.SubElement(row, 'td').text = val.encode('ascii','replace')
+            elif isinstance(val, QDateTime):
+                ET.SubElement(row, 'td').text = val.toString("dd-MM-yyyy hh:mm:ss")
+            elif isinstance(val, QDate):
+                ET.SubElement(row, 'td').text = val.toString("dd-MM-yyyy")
             else:                        ET.SubElement(row, 'td').text = str(val)
 
     def show(self):

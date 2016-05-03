@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_OmgevingsAnalyseDlg.ui'
 #
-# Created: Tue Apr 26 17:10:50 2016
+# Created: Wed Apr 27 10:02:24 2016
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -162,7 +162,7 @@ class Ui_OmgevingsAnalyseDlg(object):
         self.inputLocationTabs.setTabText(self.inputLocationTabs.indexOf(self.adresLocationTab), _translate("OmgevingsAnalyseDlg", "Via Adres", None))
         self.label_4.setText(_translate("OmgevingsAnalyseDlg", "TODO", None))
         self.inputLocationTabs.setTabText(self.inputLocationTabs.indexOf(self.parcelLocationTab), _translate("OmgevingsAnalyseDlg", "Via Perceel", None))
-        self.searchRadiusLbl.setText(_translate("OmgevingsAnalyseDlg", "Zoekstraal:", None))
+        self.searchRadiusLbl.setText(_translate("OmgevingsAnalyseDlg", "Maximale zoekstraal:", None))
         self.searchRaduisNum.setSuffix(_translate("OmgevingsAnalyseDlg", "  m", None))
         self.label_6.setText(_translate("OmgevingsAnalyseDlg", "Rapport Titel:", None))
         self.rapportTitleTxt.setText(_translate("OmgevingsAnalyseDlg", "Omgevingsrapport", None))
