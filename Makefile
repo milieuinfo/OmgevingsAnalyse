@@ -48,7 +48,7 @@ PY_FILES = \
 
 UI_FILES = ui_OmgevingsAnalyseDlg.py ui_resultDlg.py
 
-EXTRAS = metadata.txt img
+EXTRAS = metadata.txt img data
 
 RESOURCE_FILES = resources_rc.py
 

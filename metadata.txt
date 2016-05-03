@@ -8,7 +8,7 @@
 
 [general]
 name=Omgevings Analyse Rapport
-qgisMinimumVersion=2.0
+qgisMinimumVersion=2.8
 description=Maak een rapport over de omgeving van een adres, perceel of punt
 version=0.2
 author=Kay Warrie

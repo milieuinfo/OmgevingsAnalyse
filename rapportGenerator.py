@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as ET
 from ui_resultDlg import Ui_ResultDlg
-from PyQt.QtCore import QDateTime, QDate
+from PyQt4.QtCore import QDateTime, QDate
 from PyQt4.QtGui import QDialog, QFileDialog
 from htmlInteraction import htmlInteraction, magnifyingGlass
 

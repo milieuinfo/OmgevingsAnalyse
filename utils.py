@@ -1,8 +1,7 @@
 #several miscellaneous reusable fucntions
-from qgis.core import  *
-from qgis.gui import *
-from PyQt4 import QtGui
-
+from qgis.core import QgsExpression
+from qgis.gui import QgsVertexMarker
+from PyQt4.QtGui import QColor
 
 def feat2dict( feature ):
     featDict = {}
@@ -24,7 +23,7 @@ def where(layer, exp):
             yield feature
 
 
-def addMarker(iface, pnt, clr=QtGui.QColor(0, 255, 0), ico=QgsVertexMarker.ICON_BOX ):
+def addMarker(iface, pnt, clr=QColor(0, 255, 0), ico=QgsVertexMarker.ICON_BOX ):
     m = QgsVertexMarker(iface.mapCanvas())
     m.setCenter(pnt)
     m.setColor(clr)

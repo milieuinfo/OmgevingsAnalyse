@@ -1,6 +1,9 @@
 Omgevings analyse tool - rapporteertool voor milieuvergunningen
 ================================================================
 
+**TODO: percelen, data ophalen achter proxy**
+
+
 Op vraag van LNE werdt een tool ontwikeld een omgevingsrapport van locatie maakt. 
 
 Ten opzichte van de verschillende vector lagen, die ingeladen zijn in het project (WFS of vectorlaag) 

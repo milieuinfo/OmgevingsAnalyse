@@ -17,7 +17,7 @@
    <iconset resource="resources.qrc">
     <normaloff>:/plugins/OmgevingsAnalyse/img/icon.png</normaloff>:/plugins/OmgevingsAnalyse/img/icon.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
@@ -87,7 +87,31 @@
       <attribute name="title">
        <string>Via Adres</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_8">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Gemeente (of postcode):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="gemeenteCbx">
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
@@ -100,7 +124,7 @@
          <item>
           <widget class="QLineEdit" name="adresInputText">
            <property name="placeholderText">
-            <string>&lt;straat&gt; &lt;huisnr&gt; , &lt;gemeente of postcode&gt;</string>
+            <string>&lt;straat&gt; &lt;huisnr&gt;</string>
            </property>
           </widget>
          </item>

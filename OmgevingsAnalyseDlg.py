@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 
-import os, utils, sys
+import os, utils, sys, json, settings
 from threading import Timer
 from mapTool import mapTool
 from qgis.core import *
@@ -67,13 +67,21 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         self.refreshLayers()
 
-        self.gp  = Adres()
+        self.s = settings.settings()
+        if self.s.proxyEnabled:
+            self.gp = Adres( proxyUrl= self.s.proxyUrl )
+        else:
+            self.gp  = Adres()
+
+        gemJsPath = os.path.join(os.path.dirname(__file__), 'data', 'gemeentenVL.json' )
+        gemList = json.load( open( gemJsPath ) )
+        self.ui.gemeenteCbx.addItems( [n['Naam'] for n in gemList ] )
 
         # eventhandlers
         self.ui.manualLocationBtn.clicked.connect(self.manualLocationClicked)
         self.ui.adresInputText.textEdited.connect(self.adresTextEdited)
-        self.ui.adresSelectionList.itemActivated.connect(self.setAdresLocation)
-        self.ui.adresSelectionList.currentItemChanged.connect(self.setAdresLocation)
+        self.ui.adresSelectionList.currentRowChanged.connect(self.setAdresLocation)
+        self.ui.adresSelectionList.clicked.connect(self.setAdresLocation)
 
         self.iface.mapCanvas().layersChanged.connect(self.refreshLayers)
         self.accepted.connect(self.generateRapport)
@@ -110,12 +118,20 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
     #events
     def adresTextEdited(self):
-        partialAdres = self.ui.adresInputText.text()
+        partialAdres = self.getAdres()
+
         adresSuggestions = self.gp.fetchSuggestion( partialAdres, 20 )
         if type(adresSuggestions) is list:
             self.ui.adresSelectionList.clear()
             self.ui.adresLocationTxt.setText("")
             self.ui.adresSelectionList.addItems(adresSuggestions)
+
+    def getAdres(self):
+        partialAdres = self.ui.adresInputText.text()
+        gemeente = self.ui.gemeenteCbx.currentText()
+        if gemeente.strip():
+            partialAdres = partialAdres + "," + gemeente
+        return partialAdres
 
     def setAdresLocation(self):
         selItems =  self.ui.adresSelectionList.selectedItems()
@@ -124,12 +140,14 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
             locs = self.gp.fetchLocation(self.adresLocName ,1)
             if len(locs) < 1:
-                raise Exception("Adres not found: " + self.adresLocName)
+                self.ui.adresLocationTxt.setText("")
+                return
+                # raise Exception("Adres not found: " + self.adresLocName)
 
             xlb, ylb = locs[0]["Location"]["X_Lambert72"], locs[0]["Location"]["Y_Lambert72"]
 
             self.adresLoc_lam72 =  QgsGeometry.fromPoint( QgsPoint(xlb, ylb) )
-            self.ui.adresLocationTxt.setText( "{0:.0f} - {1:.0f}, {2}".format( xlb, ylb, self.adresLocName) )
+            self.ui.adresLocationTxt.setText( "{0:.0f} - {1:.0f}, {2}".format( xlb, ylb, self.adresLocName).encode('utf-8') )
 
             xform = QgsCoordinateTransform( self.lam72, self.iface.mapCanvas().mapSettings().destinationCrs() )
             self.flashMarker( xform.transform( xlb, ylb ) )
@@ -160,7 +178,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             index = QgsSpatialIndex( lyr.getFeatures() )
 
             loc = loc_lam72.centroid()
-            loc.transform(QgsCoordinateTransform( self.lam72,  lyr.crs()) )
+            loc.transform(QgsCoordinateTransform( self.lam72, lyr.crs()) )
 
             # the 10 nearest features according to the index
             nearest = index.nearestNeighbor(loc.asPoint(), 10)
@@ -193,10 +211,10 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             if Distance > radius or Geometry is None: continue
 
             lyr.setSelectedFeatures(nearestID)
-            bbox = Geometry.buffer(1 ,4) # buffer with 4 vertices = boundingbox
-            bbox.transform( QgsCoordinateTransform(lyr.crs(), mapCrs) )
-            xmin, ymin, xmax, ymax = [ bbox.boundingBox().xMinimum() , bbox.boundingBox().yMinimum() ,
-                                       bbox.boundingBox().xMaximum() , bbox.boundingBox().yMaximum() ]
+            Geometry.transform( QgsCoordinateTransform(lyr.crs(), mapCrs) )
+            bbox = Geometry.boundingBox()
+            xmin, ymin, xmax, ymax = [ bbox.xMinimum() - 10 , bbox.yMinimum() - 10 ,
+                                       bbox.xMaximum() + 10 , bbox.yMaximum() + 10 ]
             attr = utils.feat2dict(Features)
             rap.addLayer(lyr.name(), attr, Distance, xmin, ymin, xmax, ymax )
         rap.show()
