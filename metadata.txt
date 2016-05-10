@@ -7,10 +7,11 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=Omgevings Analyse Rapport
+name=Omgevings_Analyse_Rapport
 qgisMinimumVersion=2.8
-description=Maak een rapport over de omgeving van een adres, perceel of punt
-version=0.2
+description=Doe een analyse over de omgeving van een adres, perceel of punt. Ten opzichte van de verschillende vector lagen, die ingeladen zijn in het project  wordt een soort rapport gegenereerd wordt voor de meest nabije locatie. Het resultaat kan worden opslagen als een bestand dat je kan openen in MS word.
+
+version=0.3
 author=Kay Warrie
 email=kaywarrie@gmail.com
 
