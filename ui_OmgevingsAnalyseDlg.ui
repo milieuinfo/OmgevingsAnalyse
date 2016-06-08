@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>470</width>
-    <height>596</height>
+    <width>422</width>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <iconset resource="resources.qrc">
     <normaloff>:/plugins/OmgevingsAnalyse/img/icon.png</normaloff>:/plugins/OmgevingsAnalyse/img/icon.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
@@ -26,204 +26,44 @@
     </widget>
    </item>
    <item>
-    <widget class="QTabWidget" name="inputLocationTabs">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>200</height>
-      </size>
-     </property>
-     <property name="currentIndex">
-      <number>1</number>
-     </property>
-     <widget class="QWidget" name="manualLocationTab">
-      <attribute name="title">
-       <string>Handmatig</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QPushButton" name="manualLocationBtn">
-         <property name="text">
-          <string>Kies locatie op de kaart</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Gekozen locatie:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="manualLocationTxt">
-         <property name="text">
-          <string>0 - 0</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="adresLocationTab">
-      <attribute name="title">
-       <string>Via Adres</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QLabel" name="label_8">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Gemeente (of postcode):</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="gemeenteCbx">
-           <property name="editable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Adres:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="adresInputText">
-           <property name="placeholderText">
-            <string>&lt;straat&gt; &lt;huisnr&gt;</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QListWidget" name="adresSelectionList"/>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>Gekozen locatie:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="adresLocationTxt">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="placeholderText">
-            <string>&lt;x&gt; - &lt;y&gt; , &lt;adres&gt;</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="parcelLocationTab">
-      <attribute name="title">
-       <string>Via Perceel</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>TODO</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QPushButton" name="manualLocationBtn">
+       <property name="text">
+        <string>Kies locatie op de kaart</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="polyLocationBtn">
+       <property name="text">
+        <string>Teken Polygoon op de kaart</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLabel" name="searchRadiusLbl">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Maximale zoekstraal:</string>
+        <string>Gekozen locatie:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="searchRaduisNum">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QLineEdit" name="manualLocationTxt">
+       <property name="text">
+        <string>0 - 0</string>
        </property>
-       <property name="specialValueText">
-        <string/>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
-       <property name="suffix">
-        <string>  m</string>
-       </property>
-       <property name="maximum">
-        <double>1000000000.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>50.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>100.000000000000000</double>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
@@ -256,16 +96,28 @@
     </widget>
    </item>
    <item>
-    <widget class="QListWidget" name="layerList">
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-     <property name="showDropIndicator" stdset="0">
+    <widget class="QTableWidget" name="layerTbl">
+     <property name="cornerButtonEnabled">
       <bool>false</bool>
      </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::NoSelection</enum>
-     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Laagnaam</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Zoekafstand (m)</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Aantal resultaten</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>

@@ -40,7 +40,7 @@ SOURCES = \
 	__init__.py \
 	OmgevingsAnalyse.py OmgevingsAnalyse_dialog.py
 
-PLUGINNAME = OmgevingsAnalyse
+PLUGINNAME = Omgevings_Analyse_Rapport
 
 PY_FILES = \
 	__init__.py  utils.py htmlInteraction.py geopunt.py \
@@ -78,17 +78,16 @@ compile: $(UI_FILES) $(RESOURCE_FILES)
 	#pyuic4 -o $@ $<
 	python C:\OSGeo4W64\apps\Python27\lib\site-packages\PyQt4\uic\pyuic.py -o $@ $<
 
-deploy: compile transcompile
+deploy: compile transcompile derase
 	# The deploy  target only works on unix like operating system where
 	# the Python plugin directory is located at:
 	# $HOME/$(QGISDIR)/python/plugins
-	if [ -d "$(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)" ]; then rm -r $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME); fi
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	cp -vf $(UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 
 # The dclean target removes compiled python files from plugin directory
 # also deletes any .git entry
@@ -97,7 +96,7 @@ dclean:
 	find $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME) -iname ".git" -prune -exec rm -Rf {} \;
 
 derase:
-	rm -Rf $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	if [ -d "$(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)" ]; then rm -r $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME); fi
 
 zip: deploy
 	# The zip target deploys the plugin and creates a zip file with the deployed
