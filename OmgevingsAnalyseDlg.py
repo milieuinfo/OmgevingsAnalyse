@@ -165,17 +165,20 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                                                      if self.ui.layerTbl.item(n,0).text() == lyr.name()][0].value()
 
             index = QgsSpatialIndex( lyr.getFeatures() )
-            loc = loc_lam72.centroid()
-            loc.transform(QgsCoordinateTransform( self.lam72, lyr.crs()) )
+            xform = QgsCoordinateTransform(self.lam72, lyr.crs())
+            loc = loc_lam72
+            loc.transform(xform)
 
             #TODO handle polygon --> the 10 nearest features according to the index
-            if loc.type() == QGis.Point :
-                nearest = index.nearestNeighbor(loc.asPoint(), num)
+            if loc_lam72.type() == QGis.Point :
+                nearest = index.nearestNeighbor(loc.centroid().asPoint(), num)
             else:
-                nearest = index.intersects( loc.boundingBox() )[:n]
+                bbox =  loc.boundingBox().buffer(radius)
+                nearest = index.intersects( bbox )[:num]
 
             rap.addLayer(lyr.name(), [ n.name() for n in lyr.fields().toList()] )
             ids = []
+
             for FID in nearest:
                 feat = [f for f in lyr.getFeatures(QgsFeatureRequest(FID))][0]
                 geom = feat.geometry()
