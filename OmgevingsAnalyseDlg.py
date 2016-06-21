@@ -61,6 +61,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         self._initGui()
 
+    #private
     def _initGui(self):
         self.ui = Ui_OmgevingsAnalyseDlg()
         self.ui.setupUi(self)
@@ -114,6 +115,43 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             self.iface.mapCanvas().scene().removeItem(graphic)
         self.graphicsLayer = []
 
+    def _findIntersectingRecords(self, loc, lyr, maxNum, radius, rap):
+        mapCrs = self.iface.mapCanvas().mapSettings().destinationCrs()
+        index = QgsSpatialIndex(lyr.getFeatures())
+
+        if loc.type() == QGis.Point:
+            nearest = index.nearestNeighbor(loc.centroid().asPoint(), maxNum)
+        else:
+            bbox = loc.boundingBox().buffer(radius)
+            nearest = index.intersects(bbox)
+
+        rap.addLayer(lyr.name(), [n.name() for n in lyr.fields().toList()])
+        ids = []
+        count = 0
+        for FID in nearest:
+            feat = [f for f in lyr.getFeatures(QgsFeatureRequest(FID))][0]
+            geom = feat.geometry()
+            attr = utils.feat2dict(feat)
+            if loc.within(geom) or geom.within(loc) or loc.overlaps(geom):
+                Distance = 0
+            else:
+                Distance = geom.distance(loc)
+            if Distance > radius: continue
+            ids.append(FID)
+            Geometry = geom
+            Geometry.transform(QgsCoordinateTransform(lyr.crs(), mapCrs))
+            bbox = Geometry.boundingBox()
+            xmin, ymin, xmax, ymax = [bbox.xMinimum() - 25, bbox.yMinimum() - 25,
+                                      bbox.xMaximum() + 25, bbox.yMaximum() + 25]
+            rap.addAttrRow(attr, Distance, xmin, ymin, xmax, ymax)
+
+            # break if bigger then max
+            count += 1
+            if count > maxNum: break
+
+        lyr.setSelectedFeatures(ids)
+
+    #events
     def refreshLayers(self):
         self.mapLayers = [ n for n in QgsMapLayerRegistry.instance().mapLayers().values()
                              if n.type() == QgsMapLayer.VectorLayer and  n.geometryType() != QGis.NoGeometry ]
@@ -142,7 +180,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
             rowCount += 1
 
-    #events
     def generateRapport(self):
         loc_lam72 = self.manualLoc_lam72
         title = self.manualLocationName
@@ -154,50 +191,21 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                                                                if self.ui.layerTbl.item(n,0).checkState() ]
         lyrs = [ m for m in self.mapLayers if m.name() in checkedLayerNames ]
 
-        mapCrs = self.iface.mapCanvas().mapSettings().destinationCrs()
-
-        rap = rapportGenerator(self.iface, rapportTitle, title)
+        raport = rapportGenerator(self.iface, rapportTitle, title)
 
         for lyr in lyrs:
             radius = [self.ui.layerTbl.cellWidget(n, 1) for n in range(self.ui.layerTbl.rowCount() )
-                                                     if self.ui.layerTbl.item(n,0).text() == lyr.name()][0].value()
-            num =    [self.ui.layerTbl.cellWidget(n, 2) for n in range(self.ui.layerTbl.rowCount() )
-                                                     if self.ui.layerTbl.item(n,0).text() == lyr.name()][0].value()
+                                                 if self.ui.layerTbl.item(n,0).text() == lyr.name()][0].value()
+            maxNum =    [self.ui.layerTbl.cellWidget(n, 2) for n in range(self.ui.layerTbl.rowCount() )
+                                                 if self.ui.layerTbl.item(n,0).text() == lyr.name()][0].value()
 
-            index = QgsSpatialIndex( lyr.getFeatures() )
             xform = QgsCoordinateTransform(self.lam72, lyr.crs())
             loc = loc_lam72
-            loc.transform(xform)
+            loc.transform(xform) #match crs with lyr
 
-            #TODO handle polygon --> the 10 nearest features according to the index
-            if loc_lam72.type() == QGis.Point :
-                nearest = index.nearestNeighbor(loc.centroid().asPoint(), num)
-            else:
-                bbox =  loc.boundingBox().buffer(radius)
-                nearest = index.intersects( bbox )[:num]
-
-            rap.addLayer(lyr.name(), [ n.name() for n in lyr.fields().toList()] )
-            ids = []
-
-            for FID in nearest:
-                feat = [f for f in lyr.getFeatures(QgsFeatureRequest(FID))][0]
-                geom = feat.geometry()
-                attr = utils.feat2dict(feat)
-                if loc.within(geom) or geom.within(loc) or loc.overlaps(geom):
-                    Distance = 0
-                else:
-                    Distance = geom.distance(loc)
-                if Distance > radius: continue
-                ids.append(FID)
-                Geometry = geom
-                Geometry.transform(QgsCoordinateTransform(lyr.crs(), mapCrs))
-                bbox = Geometry.boundingBox()
-                xmin, ymin, xmax, ymax = [ bbox.xMinimum() - 25 , bbox.yMinimum() - 25 ,
-                                           bbox.xMaximum() + 25 , bbox.yMaximum() + 25 ]
-                rap.addAttrRow( attr, Distance, xmin, ymin, xmax, ymax )
-
-            lyr.setSelectedFeatures(ids)
-        rap.show()
+            # find the intersecting records between loc and lyr and rec to raport
+            self._findIntersectingRecords(loc, lyr, maxNum, radius, raport)
+        raport.show()
 
     def manualLocationClicked(self):
         self.mapTool = mapTool(self.iface, self._manualLocationCallback)
