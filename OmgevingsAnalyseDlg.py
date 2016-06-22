@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 
-import os, utils, sys, settings
+import os, utils, json, settings
 from threading import Timer
 from mapTool import mapTool, polyTool
 from qgis.core import *
@@ -50,6 +50,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         #props
         self.mapTool = None
         self.polyTool = None
+        self.s = None
         # data
         self.graphicsLayer = []
         self.mapLayers = []
@@ -67,9 +68,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.ui.setupUi(self)
         self.ui.layerTbl.setColumnWidth(0, 250)
 
+        self.loadSettings()
         self.refreshLayers()
-
-        self.s = settings.settings()
 
         # eventhandlers
         self.ui.manualLocationBtn.clicked.connect(self.manualLocationClicked)
@@ -77,6 +77,9 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         self.iface.mapCanvas().layersChanged.connect(self.refreshLayers)
         self.accepted.connect(self.generateRapport)
+
+        QgsProject.instance().readProject.connect( self.loadSettings )
+        QgsProject.instance().writeProject.connect( self.saveSettings )
 
     def _manualLocationCallback(self, point):
         #set location an and location name
@@ -153,6 +156,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
     #events
     def refreshLayers(self):
+        setLayers = json.loads( self.s.layerSettings )
+
         self.mapLayers = [ n for n in QgsMapLayerRegistry.instance().mapLayers().values()
                              if n.type() == QgsMapLayer.VectorLayer and  n.geometryType() != QGis.NoGeometry ]
         self.ui.layerTbl.clearContents()
@@ -160,22 +165,33 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         rowCount = 0
         for mapLayer in self.mapLayers:
+            if len( [l for l in setLayers if mapLayer.name() == l["name"]] ):
+                lr = [l for l in setLayers if mapLayer.name() == l["name"]][0]
+                maxNum =  lr["max"] if "max" in lr else 10
+                radius = lr["radius"] if "radius" in lr else 100
+                checkStateSet = lr["checked"] if "checked" in lr else 0
+            else:
+                maxNum = 10
+                radius = 100
+                checkStateSet = 0
+
             item = QtGui.QTableWidgetItem( mapLayer.name() )
             item.setFlags(QtCore.Qt.ItemIsUserCheckable |
                           QtCore.Qt.ItemIsEnabled)
-            item.setCheckState(QtCore.Qt.Unchecked)
+            if checkStateSet: item.setCheckState(QtCore.Qt.Checked)
+            else: item.setCheckState(QtCore.Qt.Unchecked)
 
             self.ui.layerTbl.insertRow(rowCount)
             self.ui.layerTbl.setItem(rowCount, 0, item )
 
             searchNum = QtGui.QDoubleSpinBox( self.ui.layerTbl )
             searchNum.setRange(0, 100000)
-            searchNum.setValue(100)
+            searchNum.setValue( radius )
             self.ui.layerTbl.setCellWidget(rowCount, 1, searchNum )
 
             resultCountNum = QtGui.QSpinBox( self.ui.layerTbl )
             resultCountNum.setRange(1, 100)
-            resultCountNum.setValue(10)
+            resultCountNum.setValue(maxNum)
             self.ui.layerTbl.setCellWidget(rowCount, 2, resultCountNum )
 
             rowCount += 1
@@ -196,7 +212,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         for lyr in lyrs:
             radius = [self.ui.layerTbl.cellWidget(n, 1) for n in range(self.ui.layerTbl.rowCount() )
                                                  if self.ui.layerTbl.item(n,0).text() == lyr.name()][0].value()
-            maxNum =    [self.ui.layerTbl.cellWidget(n, 2) for n in range(self.ui.layerTbl.rowCount() )
+            maxNum = [self.ui.layerTbl.cellWidget(n, 2) for n in range(self.ui.layerTbl.rowCount() )
                                                  if self.ui.layerTbl.item(n,0).text() == lyr.name()][0].value()
 
             xform = QgsCoordinateTransform(self.lam72, lyr.crs())
@@ -222,3 +238,22 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         mkr = utils.addMarker(self.iface, point)
         self.graphicsLayer.append(mkr)
         Timer(time, self._clearGraphicLayer, ()).start()
+
+    def loadSettings(self):
+        self.s = settings.settings()
+        self.ui.rapportTitleTxt.setText(self.s.rapportTitle)
+
+    def saveSettings(self):
+
+        layerSettings = []
+        for n in range(self.ui.layerTbl.rowCount()):
+            layer = {
+                "name": self.ui.layerTbl.item(n, 0).text(),
+                "checked": int( self.ui.layerTbl.item(n, 0).checkState() ),
+                "radius": self.ui.layerTbl.cellWidget(n, 1).value(),
+                "max" : self.ui.layerTbl.cellWidget(n, 2).value()}
+            layerSettings.append( layer )
+
+        self.s.layerSettings = json.dumps( layerSettings )
+        self.s.rapportTitle = self.ui.rapportTitleTxt.text()
+        self.s.saveSettings()
