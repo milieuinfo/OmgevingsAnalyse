@@ -6,8 +6,9 @@ from PyQt4.QtGui import QDialog, QFileDialog
 from htmlInteraction import htmlInteraction, magnifyingGlass
 
 class rapportGenerator:
-    def __init__(self, iface, rapportName="", locationName=""):
+    def __init__(self, iface, rapportName="", locationName="", graphics=[]):
         self.iface = iface
+        self.graphics = graphics
         self.body = ET.Element("body")
         self.rapportName  = rapportName
         self.locationName = locationName
@@ -70,14 +71,16 @@ class rapportGenerator:
         result = dlg.exec_()
         if result:
             filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
-                                                   "Opslaan als", None, "WORD (*.DOC);;HTML (*.html)" )
+                                                "Opslaan als", None, "WORD (*.DOC);;HTML (*.html)" )
             if filename: self.save(filename)
+
+        for graphic in self.graphics:
+            self.iface.mapCanvas().scene().removeItem(graphic)
 
     def toString(self):
         return ET.tostring(self.body)
 
     def save(self, path):
-        #TODO : remove buttons
         tree = ET.ElementTree(self.body)
         tree.write( path )
 

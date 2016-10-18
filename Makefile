@@ -43,7 +43,7 @@ SOURCES = \
 PLUGINNAME = Omgevings_Analyse_Rapport
 
 PY_FILES = \
-	__init__.py  utils.py htmlInteraction.py geopunt.py \
+	__init__.py  utils.py htmlInteraction.py  \
 	OmgevingsAnalyse.py OmgevingsAnalyseDlg.py mapTool.py rapportGenerator.py settings.py
 
 UI_FILES = ui_OmgevingsAnalyseDlg.py ui_resultDlg.py

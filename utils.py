@@ -1,6 +1,6 @@
 #several miscellaneous reusable fucntions
 from qgis.core import QgsExpression
-from qgis.gui import QgsVertexMarker
+from qgis.gui import QgsVertexMarker, QgsRubberBand
 from PyQt4.QtGui import QColor
 
 def feat2dict( feature ):
@@ -31,3 +31,4 @@ def addMarker(iface, pnt, clr=QColor(0, 255, 0), ico=QgsVertexMarker.ICON_BOX ):
     m.setIconType(ico)
     m.setPenWidth(9)
     return m
+

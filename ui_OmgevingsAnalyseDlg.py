@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_OmgevingsAnalyseDlg.ui'
 #
-# Created: Wed Jun 08 14:45:13 2016
+# Created: Tue Oct 18 14:23:26 2016
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_OmgevingsAnalyseDlg(object):
     def setupUi(self, OmgevingsAnalyseDlg):
         OmgevingsAnalyseDlg.setObjectName(_fromUtf8("OmgevingsAnalyseDlg"))
-        OmgevingsAnalyseDlg.resize(422, 454)
+        OmgevingsAnalyseDlg.resize(454, 481)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/OmgevingsAnalyse/img/icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         OmgevingsAnalyseDlg.setWindowIcon(icon)
@@ -40,6 +40,9 @@ class Ui_OmgevingsAnalyseDlg(object):
         self.manualLocationBtn = QtGui.QPushButton(OmgevingsAnalyseDlg)
         self.manualLocationBtn.setObjectName(_fromUtf8("manualLocationBtn"))
         self.horizontalLayout_4.addWidget(self.manualLocationBtn)
+        self.lineLocationBtn = QtGui.QPushButton(OmgevingsAnalyseDlg)
+        self.lineLocationBtn.setObjectName(_fromUtf8("lineLocationBtn"))
+        self.horizontalLayout_4.addWidget(self.lineLocationBtn)
         self.polyLocationBtn = QtGui.QPushButton(OmgevingsAnalyseDlg)
         self.polyLocationBtn.setObjectName(_fromUtf8("polyLocationBtn"))
         self.horizontalLayout_4.addWidget(self.polyLocationBtn)
@@ -65,6 +68,9 @@ class Ui_OmgevingsAnalyseDlg(object):
         self.rapportTitleTxt.setObjectName(_fromUtf8("rapportTitleTxt"))
         self.horizontalLayout_2.addWidget(self.rapportTitleTxt)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.selFeatsChk = QtGui.QCheckBox(OmgevingsAnalyseDlg)
+        self.selFeatsChk.setObjectName(_fromUtf8("selFeatsChk"))
+        self.verticalLayout.addWidget(self.selFeatsChk)
         self.label = QtGui.QLabel(OmgevingsAnalyseDlg)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
@@ -96,11 +102,13 @@ class Ui_OmgevingsAnalyseDlg(object):
         OmgevingsAnalyseDlg.setWindowTitle(_translate("OmgevingsAnalyseDlg", "Omgevings Analyse Rapport", None))
         self.label_2.setText(_translate("OmgevingsAnalyseDlg", "Input locatie:", None))
         self.manualLocationBtn.setText(_translate("OmgevingsAnalyseDlg", "Kies locatie op de kaart", None))
+        self.lineLocationBtn.setText(_translate("OmgevingsAnalyseDlg", "Teken lijn op de kaart", None))
         self.polyLocationBtn.setText(_translate("OmgevingsAnalyseDlg", "Teken Polygoon op de kaart", None))
         self.label_5.setText(_translate("OmgevingsAnalyseDlg", "Gekozen locatie:", None))
         self.manualLocationTxt.setText(_translate("OmgevingsAnalyseDlg", "0 - 0", None))
         self.label_6.setText(_translate("OmgevingsAnalyseDlg", "Rapport Titel:", None))
         self.rapportTitleTxt.setText(_translate("OmgevingsAnalyseDlg", "Omgevingsrapport", None))
+        self.selFeatsChk.setText(_translate("OmgevingsAnalyseDlg", " Selecteer de gevonden features op kaart", None))
         self.label.setText(_translate("OmgevingsAnalyseDlg", "Lagen mee te nemen in de analyse:", None))
         item = self.layerTbl.horizontalHeaderItem(0)
         item.setText(_translate("OmgevingsAnalyseDlg", "Laagnaam", None))

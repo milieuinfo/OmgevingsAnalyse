@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
-    <height>454</height>
+    <width>454</width>
+    <height>481</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,6 +31,13 @@
       <widget class="QPushButton" name="manualLocationBtn">
        <property name="text">
         <string>Kies locatie op de kaart</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="lineLocationBtn">
+       <property name="text">
+        <string>Teken lijn op de kaart</string>
        </property>
       </widget>
      </item>
@@ -87,6 +94,13 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="selFeatsChk">
+     <property name="text">
+      <string> Selecteer de gevonden features op kaart</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="label">

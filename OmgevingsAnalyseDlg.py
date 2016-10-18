@@ -22,12 +22,12 @@
 """
 
 import os, utils, json, settings
-from threading import Timer
-from mapTool import mapTool, polyTool
+from mapTool import mapTool, polyTool, lineTool
 from qgis.core import *
 from ui_OmgevingsAnalyseDlg import Ui_OmgevingsAnalyseDlg
 from PyQt4 import QtGui, QtCore
 from rapportGenerator import rapportGenerator
+
 
 class OmgevingsAnalyseDlg(QtGui.QDialog):
     def __init__(self, parent=None, iface=None):
@@ -50,7 +50,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         #props
         self.mapTool = None
         self.polyTool = None
-        self.s = None
         # data
         self.graphicsLayer = []
         self.mapLayers = []
@@ -73,15 +72,17 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         # eventhandlers
         self.ui.manualLocationBtn.clicked.connect(self.manualLocationClicked)
+        self.ui.lineLocationBtn.clicked.connect(self.lineLocationClicked)
         self.ui.polyLocationBtn.clicked.connect(self.polyLocationClicked)
 
         self.iface.mapCanvas().layersChanged.connect(self.refreshLayers)
         self.accepted.connect(self.generateRapport)
+        self.rejected.connect(self._clearGraphicLayer)
 
         QgsProject.instance().readProject.connect( self.loadSettings )
         QgsProject.instance().writeProject.connect( self.saveSettings )
 
-    def _manualLocationCallback(self, point):
+    def _manualLocationCallback(self, marker, point):
         #set location an and location name
         xform = QgsCoordinateTransform( self.iface.mapCanvas().mapSettings().destinationCrs(), self.lam72)
 
@@ -91,7 +92,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         self.ui.manualLocationTxt.setText(self.manualLocationName)
 
-        self.flashMarker(point)
+        self.flashMarker(marker)
 
         self.showNormal()
         self.activateWindow()
@@ -107,7 +108,23 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         self.ui.manualLocationTxt.setText(self.manualLocationName)
 
-        self.iface.mapCanvas().scene().removeItem(rubber)
+        self.flashMarker(rubber)
+
+        self.showNormal()
+        self.activateWindow()
+        self.iface.mapCanvas().unsetMapTool(self.mapTool)
+
+    def _lineLocationCallback(self, rubber):
+        #get the location line
+        xform = QgsCoordinateTransform(self.iface.mapCanvas().mapSettings().destinationCrs(), self.lam72)
+
+        self.manualLoc_lam72 = rubber.asGeometry()
+        self.manualLoc_lam72.transform(xform)
+        self.manualLocationName = self.manualLoc_lam72.exportToWkt()
+
+        self.ui.manualLocationTxt.setText(self.manualLocationName)
+
+        self.flashMarker(rubber)
 
         self.showNormal()
         self.activateWindow()
@@ -152,7 +169,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             count += 1
             if count > maxNum: break
 
-        lyr.setSelectedFeatures(ids)
+        if self.ui.selFeatsChk.isChecked():
+            lyr.setSelectedFeatures(ids)
 
     #events
     def refreshLayers(self):
@@ -199,6 +217,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
     def generateRapport(self):
         loc_lam72 = self.manualLoc_lam72
         title = self.manualLocationName
+        graphics = self.graphicsLayer
 
         if loc_lam72 is None: return
 
@@ -207,7 +226,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                                                                if self.ui.layerTbl.item(n,0).checkState() ]
         lyrs = [ m for m in self.mapLayers if m.name() in checkedLayerNames ]
 
-        raport = rapportGenerator(self.iface, rapportTitle, title)
+        raport = rapportGenerator(self.iface, rapportTitle, title, graphics)
 
         for lyr in lyrs:
             radius = [self.ui.layerTbl.cellWidget(n, 1) for n in range(self.ui.layerTbl.rowCount() )
@@ -222,22 +241,29 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             # find the intersecting records between loc and lyr and rec to raport
             self._findIntersectingRecords(loc, lyr, maxNum, radius, raport)
         raport.show()
+        self.graphicsLayer = []
 
     def manualLocationClicked(self):
+        self._clearGraphicLayer()
         self.mapTool = mapTool(self.iface, self._manualLocationCallback)
         self.iface.mapCanvas().setMapTool(self.mapTool)
         self.showMinimized()
 
     def polyLocationClicked(self):
+        self._clearGraphicLayer()
         self.mapTool = polyTool(self.iface, self._polyLocationCallback)
         self.iface.mapCanvas().setMapTool(self.mapTool)
         self.showMinimized()
 
-    def flashMarker(self, point, time=3):
-        """Add marker and remove it after time in sec"""
-        mkr = utils.addMarker(self.iface, point)
+    def lineLocationClicked(self):
+        self._clearGraphicLayer()
+        self.mapTool = lineTool(self.iface, self._lineLocationCallback)
+        self.iface.mapCanvas().setMapTool(self.mapTool)
+        self.showMinimized()
+
+    def flashMarker(self, mkr, time=5):
         self.graphicsLayer.append(mkr)
-        Timer(time, self._clearGraphicLayer, ()).start()
+        # Timer(time, self._clearGraphicLayer, ()).start()
 
     def loadSettings(self):
         self.s = settings.settings()
