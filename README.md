@@ -6,27 +6,25 @@ Op vraag van LNE werdt een tool ontwikeld een omgevingsrapport van locatie maakt
 Ten opzichte van de verschillende vector lagen, die ingeladen zijn in het project (WFS of vectorlaag) 
 wordt een soort rapport gegenereerd wordt voor een specifieke locatie:
 
-De gebruiker kan een locatie op de kaart aanklikken of een polygoon intekenen. 
+De gebruiker kan een locatie op de kaart aanklikken of een lijn of polygoon intekenen. 
+
+De gebruiker kan ook een vectorlaag gebruiken als input, 
+dan wordt er voor elke feature een appart rapport weggeschreven naar een output folder.  
 
 De volgende informatie wordt weergegeven:
 - Welke afstand de geslecteerde locatie tot de dichtsbijgelegen objecten van de verschillende vectorlagen gelegen zijn.
-- Toon de attributen van dichstbijgelegen feature
-- Knop bekijk op kaart /zoon naar in rapport.
-- De dichtbijzijnde objecten worden geselecteerd zodat ze op de kaart in de attribuuttable terug te vinden zijn.
+- Toon de attributen van dichstbijgelegen features
+- Knop bekijk op kaart /zoon naar in rapport
+- De gevonden objecten kunnen worden geselecteerd als je "Selecteer de gevonden features" aanvinkt, zodat ze op de kaart in de attribuuttabel terug te vinden zijn.
 - Export van rapport naar een document dat in MS Word kan geopend worden.
 - De ingestelde parameters per laag worden samen met et project opgeslagen en zijn dus opnieuw beschikbaar nadat het project werd afgesloten.  
 
 Werking
 -------
-De rapporteertool kan ontwikkelt als een QGIS plugin, de configuratie kan een gewoon QGIS-project zijn. 
-Veel gevraagde zaken zijn in principe gewoon standaard QGIS functionaliteit. 
-Speficieke knoppen uitschakellen oof zichtbaar maken is mogelijk in QGIS.
-De lagen die worden ingeladen kan worden opslagen in de in het QGIS-project (.qgs).
+De rapporteertool is ontwikkelt als een QGIS plugin, de configuratie is een gewoon QGIS-project. 
+De instellingen worden mee opgeslagen in een het QGIS-project (.qgs) zodat je deze niet staads opnieuw moet instellen.
 
-De focus van deze opdracht zal dus liggen op het ontwikkelen op de *genereer rapport* knop.
-Deze knop wordt ontwikkeld als een soort omgevings analyse tool, die de meeste nabijzijnde objecten nabij van geometrie opzoekt. 
-
-Deze ziet er momenteel zo uit:
+Het invoer formulier uit:
 
 ![](img/Mainwindow_Omgevings_Analyse_Rapport.png)
 

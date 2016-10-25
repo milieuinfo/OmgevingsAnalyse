@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4.QtCore import QSettings
 from qgis.core import QgsProject
+import os
 
 class settings:
     def __init__(self):
@@ -11,6 +12,9 @@ class settings:
 
         #settings entries
         self.rapportTitle = None
+        self.rapportLocation = None
+        self.rapportLayer = None
+        self.rapportFieldName = None
         self.layerSettings = None
         self.readSettings()
 
@@ -31,12 +35,23 @@ class settings:
             self.proxyUrl += self.proxyHost + ':' + self.proxyPort
 
     def readSettings(self):
+        if 'HOME' in os.environ:
+            home = os.environ['HOME']
+        else:
+            home = ''
+
         proj = QgsProject.instance()
         self.rapportTitle = proj.readEntry(self.scope, "rapportTitle", "Omgevings Analyse Rapport")[0]
+        self.rapportLocation = proj.readEntry(self.scope, "rapportLocation", home)[0]
         self.layerSettings = proj.readEntry(self.scope, "layerSettings", "[]")[0]
 
+        self.rapportLayer = proj.readEntry(self.scope, "rapportLayer", '')[0]
+        self.rapportFieldName = proj.readEntry(self.scope, "rapportFieldName", '')[0]
 
     def saveSettings(self):
         proj = QgsProject.instance()
-        proj.writeEntry(self.scope, "rapportTitle", self.rapportTitle )
-        proj.writeEntry(self.scope, "layerSettings", self.layerSettings )
+        proj.writeEntry(self.scope, "rapportTitle", self.rapportTitle)
+        proj.writeEntry(self.scope, "rapportLocation", self.rapportLocation)
+        proj.writeEntry(self.scope, "layerSettings", self.layerSettings)
+        proj.writeEntry(self.scope, "rapportLayer", self.rapportLayer)
+        proj.writeEntry(self.scope, "rapportFieldName", self.rapportFieldName)

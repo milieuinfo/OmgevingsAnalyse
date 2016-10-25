@@ -71,7 +71,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.refreshLayers()
 
         # eventhandlers
-        self.ui.manualLocationBtn.clicked.connect(self.manualLocationClicked)
+        self.ui.manualLocationBtn.clicked.connect(self.pointLocationClicked)
         self.ui.lineLocationBtn.clicked.connect(self.lineLocationClicked)
         self.ui.polyLocationBtn.clicked.connect(self.polyLocationClicked)
 
@@ -83,9 +83,10 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.rejected.connect(self._clearGraphicLayer)
 
         QgsProject.instance().readProject.connect( self.loadSettings )
+        self.iface.newProjectCreated.connect(self.clear)
         QgsProject.instance().writeProject.connect( self.saveSettings )
 
-    def _manualLocationCallback(self, marker, point):
+    def _pointLocationCallback(self, marker, point):
         """set location an and location name"""
         xform = QgsCoordinateTransform( self.iface.mapCanvas().mapSettings().destinationCrs(), self.lam72)
 
@@ -192,6 +193,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             fields = [field.name() for field in layer.pendingFields()]
             self.ui.titleCbx.clear()
             self.ui.titleCbx.addItems( fields )
+        else:
+            self.ui.titleCbx.clear()
 
     def refreshLayers(self):
         setLayers = json.loads( self.s.layerSettings )
@@ -200,6 +203,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                              if n.type() == QgsMapLayer.VectorLayer and  n.geometryType() != QGis.NoGeometry ]
         self.ui.inputLayerCbx.clear()
         self.ui.inputLayerCbx.addItems([ n.name() for n in self.mapLayers ])
+        self.inputLayerChanged()
         self.ui.layerTbl.clearContents()
         self.ui.layerTbl.setRowCount(0)
 
@@ -243,12 +247,14 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             self.rapportFromFile()
 
     def getOutputFolder(self):
-        outputFolder = QtGui.QFileDialog.getExistingDirectory(self.iface.mainWindow(), "Kies output folder","")
+        outputFolder = QtGui.QFileDialog.getExistingDirectory(self.iface.mainWindow(), "Kies output folder",
+                                                                                    self.s.rapportLocation)
+        self.s.rapportLocation = outputFolder
         self.ui.outPutTxt.setText(outputFolder)
 
-    def manualLocationClicked(self):
+    def pointLocationClicked(self):
         self._clearGraphicLayer()
-        self.mapTool = mapTool(self.iface, self._manualLocationCallback)
+        self.mapTool = mapTool(self.iface, self._pointLocationCallback)
         self.iface.mapCanvas().setMapTool(self.mapTool)
         self.showMinimized()
 
@@ -268,9 +274,9 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.graphicsLayer.append(mkr)
 
     def rapportFromFile(self):
-        outPutDir = self.ui.outPutTxt.text()
-        if not os.path.exists(outPutDir):
-           return self.iface.messageBar().pushMessage("Warning", "Output locatie niet opgegeven", level=QgsMessageBar.WARNING)
+
+        if not os.path.exists(self.s.rapportLocation):
+           return self.iface.messageBar().pushMessage("Warning", "Output locatie bestaat niet", level=QgsMessageBar.WARNING)
 
         checkedLayerNames = [self.ui.layerTbl.item(n, 0).text() for n in range(self.ui.layerTbl.rowCount())
                              if self.ui.layerTbl.item(n, 0).checkState()]
@@ -305,7 +311,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                 self._findIntersectingRecords(loc, analyseLyr, maxNum, radius, rapport)
 
             outName = utils.string2Filename(rapportTitle) +"_"+ str(feature[titleIdx]) +"_"+ str(feature.id()) +".DOC"
-            rapport.save( os.path.join(outPutDir, outName) )
+            rapport.save( os.path.join(self.s.rapportLocation, outName) )
 
     def rapportFromDrawing(self):
         loc_lam72 = self.manualLoc_lam72
@@ -337,9 +343,31 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         rapport.show()
         self.graphicsLayer = []
 
+    def clear(self):
+        self.ui.manualLocationTxt.setText('0 - 0')
+        self.loadSettings()
+
     def loadSettings(self):
         self.s = settings.settings()
         self.ui.rapportTitleTxt.setText(self.s.rapportTitle)
+        self.ui.outPutTxt.setText( self.s.rapportLocation )
+
+        self.refreshLayers()
+
+        try:
+            items = [self.ui.inputLayerCbx.itemText(i) for i in range(self.ui.inputLayerCbx.count())]
+            idx = items.index(self.s.rapportLayer)
+        except ValueError:
+            idx = -1
+        if idx != -1: self.ui.inputLayerCbx.setCurrentIndex(idx)
+
+        try:
+            items = [self.ui.inputLayerCbx.itemText(i) for i in range(self.ui.inputLayerCbx.count())]
+            idx = items.index(self.s.rapportLayer)
+        except ValueError:
+            idx = -1
+        if idx != -1: self.ui.titleCbx.setCurrentIndex(idx)
+
 
     def saveSettings(self):
 
@@ -354,4 +382,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
         self.s.layerSettings = json.dumps( layerSettings )
         self.s.rapportTitle = self.ui.rapportTitleTxt.text()
+        self.s.rapportLocation =  self.ui.outPutTxt.text()
+        self.s.rapportLayer = self.ui.inputLayerCbx.currentText()
+        self.s.rapportFieldName = self.ui.titleCbx.currentText()
+
         self.s.saveSettings()

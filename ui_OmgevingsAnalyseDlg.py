@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_OmgevingsAnalyseDlg.ui'
 #
-# Created: Wed Oct 19 14:52:32 2016
+# Created: Tue Oct 25 17:36:14 2016
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
