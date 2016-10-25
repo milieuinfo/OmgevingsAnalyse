@@ -47,7 +47,7 @@ class OmgevingsAnalyse:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = OmgevingsAnalyseDlg(self.iface.mainWindow(), self.iface)
+        self.OAdlg = OmgevingsAnalyseDlg(self.iface.mainWindow(), self.iface)
 
         # Declare instance attributes
         self.actions = []
@@ -130,9 +130,9 @@ class OmgevingsAnalyse:
     def run(self):
         """Run method that performs all the real work"""
         # show the dialog
-        self.dlg.show()
+        self.OAdlg.show()
         # Run the dialog event loop
-        result = self.dlg.exec_()
+        result = self.OAdlg.exec_()
         # See if OK was pressed
         if result:
             pass

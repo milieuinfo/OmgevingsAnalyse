@@ -14,24 +14,30 @@ class rapportGenerator:
         self.locationName = locationName
 
         ET.SubElement(self.body, "h1").text = rapportName
-        ET.SubElement(self.body, "div").text = "Informatatie met betrekking tot de locatie: {0}".format(locationName)
+        ET.SubElement(self.body, "div").text = "Informatie met betrekking tot de locatie: {0}".format(locationName)
 
         self.layers = ET.SubElement(self.body, "ol")
         self.activeAttrTable = None
 
-    def addLayer(self, layerName, attrs ):# dist=0, xmin=0, ymin=0, xmax=0, ymax=0):
-        lyr = ET.SubElement(self.layers, "li", {"style" : "display:inline-block;"} )
+    def addLayer(self, layerName, attrs=None ):
+        lyr = ET.SubElement(self.layers, "li"  ) # , {"style" : "display:inline-block;"}
+        lyrID = "lyr" + str( len( self.layers ))
 
         ET.SubElement( lyr, "h2" ).text = layerName
 
+        if not attrs:
+           ET.SubElement(lyr, "p").text = "Geen resultaten"
+           return
+
         ET.SubElement( lyr, "h3").text = "Attributen: "
-        self.activeAttrTable = ET.SubElement( lyr, 'table', {'border':'1px solid black'} )
+        self.activeAttrTable = ET.SubElement( lyr, 'table', {'border':'1px solid black', 'id': lyrID} )
 
         row = ET.SubElement(self.activeAttrTable, "tr")
         ET.SubElement(row, 'th' )
         ET.SubElement(row, 'th', {'style': 'text-align: left;'}).text = "Afstand tot aangeklikte locatie"
         for key in attrs:
             ET.SubElement(row, 'th', {'style':'text-align: left;'}).text = key
+
 
     def addAttrRow(self, data, dist=0, xmin=0, ymin=0, xmax=0, ymax=0):
 
@@ -72,10 +78,14 @@ class rapportGenerator:
         if result:
             filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
                                                 "Opslaan als", None, "WORD (*.DOC);;HTML (*.html)" )
-            if filename: self.save(filename)
+            if filename:
+                frame = ui.webView.page().mainFrame()
+                html = unicode(frame.toHtml()).encode('utf-8')
+                with open(filename, 'w' ) as outFile: outFile.write(html)
 
         for graphic in self.graphics:
             self.iface.mapCanvas().scene().removeItem(graphic)
+
 
     def toString(self):
         return ET.tostring(self.body)
