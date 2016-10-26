@@ -62,6 +62,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self._initGui()
 
     #private
+    # noinspection PyUnresolvedReferences
     def _initGui(self):
         self.ui = Ui_OmgevingsAnalyseDlg()
         self.ui.setupUi(self)
