@@ -75,19 +75,25 @@ compile: $(UI_FILES) $(RESOURCE_FILES)
 	pyrcc4 -o $*_rc.py  $<
 
 %.py : %.ui
-	#pyuic4 -o $@ $<
-	python C:\OSGeo4W64\apps\Python27\lib\site-packages\PyQt4\uic\pyuic.py -o $@ $<
+	pyuic4 -o $@ $<
 
 deploy: compile transcompile derase
 	# The deploy  target only works on unix like operating system where
 	# the Python plugin directory is located at:
 	# $HOME/$(QGISDIR)/python/plugins
+	if [ -d "$(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)" ]; then rm -r $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME); fi
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+
+# [KW]: extra command with my own python script, that I can also use on windows
+# workflow testPlugin.py: pack -> extract at QGISDIR -> start QGIS
+runplugin: compile  
+	python $(CURDIR)/scripts/testPlugin.py
+	
 
 # The dclean target removes compiled python files from plugin directory
 # also deletes any .git entry

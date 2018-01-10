@@ -6,7 +6,6 @@
  Maak een rapport over de omgeving van een adres, perceel of punt
                              -------------------
         begin                : 2016-03-31
-        git sha              : $Format:%H$
         copyright            : (C) 2016 by Kay Warrie
         email                : kaywarrie@gmail.com
  ***************************************************************************/
@@ -142,13 +141,20 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
     def _findIntersectingRecords(self, loc, lyr, maxNum, radius, rap):
         mapCrs = self.iface.mapCanvas().mapSettings().destinationCrs()
-        index = QgsSpatialIndex(lyr.getFeatures())
+        
+        try:  
+           index = QgsSpatialIndex(lyr.getFeatures())
+           if loc.type() == QGis.Point:
+               nearest = index.nearestNeighbor(loc.centroid().asPoint(), maxNum)
+           else:
+               bbox = loc.boundingBox().buffer(radius)
+               nearest = index.intersects(bbox)
+        except:
+           #altenative slower method, incase QgsSpatialIndex deos not work
+           expr = QgsExpression( "intersects( $geometry, buffer( geom_from_wkt('{0}') , {1}) )".format( loc.exportToWkt(), radius ) )
+           bbox = loc.boundingBox().buffer(radius)
+           nearest = [i.id() for i in lyr.getFeatures( QgsFeatureRequest(expr) ) ]
 
-        if loc.type() == QGis.Point:
-            nearest = index.nearestNeighbor(loc.centroid().asPoint(), maxNum)
-        else:
-            bbox = loc.boundingBox().buffer(radius)
-            nearest = index.intersects(bbox)
 
         ids = []
         rapRows = []
@@ -275,7 +281,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.graphicsLayer.append(mkr)
 
     def rapportFromFile(self):
-
+        #TODO wait dialog
         if not os.path.exists(self.s.rapportLocation):
            return self.iface.messageBar().pushMessage("Warning", "Output locatie bestaat niet", level=QgsMessageBar.WARNING)
 
@@ -315,6 +321,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             rapport.save( os.path.join(self.s.rapportLocation, outName) )
 
     def rapportFromDrawing(self):
+        #wait dialog
         loc_lam72 = self.manualLoc_lam72
         title = self.manualLocationName
         graphics = self.graphicsLayer
