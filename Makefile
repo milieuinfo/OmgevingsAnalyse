@@ -46,7 +46,7 @@ PY_FILES = \
 	__init__.py  utils.py htmlInteraction.py  \
 	OmgevingsAnalyse.py OmgevingsAnalyseDlg.py mapTool.py rapportGenerator.py settings.py
 
-UI_FILES = ui_OmgevingsAnalyseDlg.py ui_resultDlg.py
+UI_FILES = ui_OmgevingsAnalyseDlg.py ui_resultDlg.py ui_progressBar.py
 
 EXTRAS = metadata.txt img data
 

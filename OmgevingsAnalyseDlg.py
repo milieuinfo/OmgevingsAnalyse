@@ -27,6 +27,7 @@ from qgis.gui import QgsMessageBar
 from ui_OmgevingsAnalyseDlg import Ui_OmgevingsAnalyseDlg
 from PyQt4 import QtGui, QtCore
 from rapportGenerator import rapportGenerator
+from progressDlg import progressDlg
 
 class OmgevingsAnalyseDlg(QtGui.QDialog):
     def __init__(self, parent=None, iface=None):
@@ -150,7 +151,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                bbox = loc.boundingBox().buffer(radius)
                nearest = index.intersects(bbox)
         except:
-           #altenative slower method, incase QgsSpatialIndex deos not work
+           #altenative slower method, in case QgsSpatialIndex does not work
            expr = QgsExpression( "intersects( $geometry, buffer( geom_from_wkt('{0}') , {1}) )".format( loc.exportToWkt(), radius ) )
            bbox = loc.boundingBox().buffer(radius)
            nearest = [i.id() for i in lyr.getFeatures( QgsFeatureRequest(expr) ) ]
@@ -172,10 +173,8 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             ids.append(FID)
             Geometry = geom
             Geometry.transform(QgsCoordinateTransform(lyr.crs(), mapCrs))
-            bbox = Geometry.boundingBox()
-            xmin, ymin, xmax, ymax = [bbox.xMinimum() - 25, bbox.yMinimum() - 25,
-                                      bbox.xMaximum() + 25, bbox.yMaximum() + 25]
-            rapRows.append([ attr, Distance, xmin, ymin, xmax, ymax ])
+            wkt = Geometry.exportToWkt(4)
+            rapRows.append([ attr, Distance, wkt ])
 
             # break if bigger then max
             count += 1
@@ -334,7 +333,10 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                              if self.ui.layerTbl.item(n, 0).checkState()]
         lyrs = [m for m in self.mapLayers if m.name() in checkedLayerNames]
 
+        #forms
         rapport = rapportGenerator(self.iface, rapportTitle, title, graphics)
+        #progress = progressDlg(None, self.iface, len(lyrs))
+        #progress.show()
 
         for lyr in lyrs:
             radius = [self.ui.layerTbl.cellWidget(n, 1) for n in range(self.ui.layerTbl.rowCount())
@@ -348,6 +350,9 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
             # find the intersecting records between loc and lyr and rec to raport
             self._findIntersectingRecords(loc, lyr, maxNum, radius, rapport)
+            #progress.update(None, lyr.name() )
+
+        #progress.close() 
         rapport.show()
         self.graphicsLayer = []
 
@@ -359,7 +364,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.s = settings.settings()
         self.ui.rapportTitleTxt.setText(self.s.rapportTitle)
         self.ui.outPutTxt.setText( self.s.rapportLocation )
-
         self.refreshLayers()
 
         try:
@@ -378,7 +382,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
 
     def saveSettings(self):
-
         layerSettings = []
         for n in range(self.ui.layerTbl.rowCount()):
             layer = {

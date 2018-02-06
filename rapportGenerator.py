@@ -39,19 +39,13 @@ class rapportGenerator:
             ET.SubElement(row, 'th', {'style':'text-align: left;'}).text = key
 
 
-    def addAttrRow(self, data, dist=0, xmin=0, ymin=0, xmax=0, ymax=0):
-
+    def addAttrRow(self, data, dist=0, wkt=''):
         row = ET.SubElement(self.activeAttrTable, "tr")
         btnCell =  ET.SubElement(row, 'td')
 
-        if xmin > 0 and ymin > 0 and xmax > 0 and ymax > 0:
-           btn = ET.SubElement(btnCell, "button", {"onClick": "pyObj.zoomToRect({0}, {1}, {2}, {3})".format(xmin, ymin, xmax, ymax)})
-           svg = ET.fromstring(magnifyingGlass)
-           btn.append( svg )
-        elif xmin > 0 and ymin > 0:
-           btn = ET.SubElement(btnCell, "button", {"onClick": "pyObj.moveMapTo({0}, {1}, 0)".format(xmin, ymin)})
-           svg = ET.fromstring( magnifyingGlass )
-           btn.append( svg )
+        btn = ET.SubElement(btnCell, "button", {"onClick": "pyObj.zoomAndShowWKT('{0}')".format(wkt)})
+        svg = ET.fromstring(magnifyingGlass)
+        btn.append(svg)
 
         ET.SubElement(row, 'td').text = "{:.2f}".format(dist)
 
@@ -77,7 +71,7 @@ class rapportGenerator:
         result = dlg.exec_()
         if result:
             filename = QFileDialog.getSaveFileName(self.iface.mainWindow(),
-                                                "Opslaan als", None, "WORD (*.DOC);;HTML (*.html)" )
+                                          "Opslaan als", None, "WORD (*.DOC);;HTML (*.html)" )
             if filename:
                 frame = ui.webView.page().mainFrame()
                 html = unicode(frame.toHtml()).encode('utf-8')
@@ -85,7 +79,7 @@ class rapportGenerator:
 
         for graphic in self.graphics:
             self.iface.mapCanvas().scene().removeItem(graphic)
-
+        myObj.clear()
 
     def toString(self):
         return ET.tostring(self.body)
