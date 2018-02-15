@@ -11,7 +11,7 @@ name=Omgevings_Analyse_Rapport
 qgisMinimumVersion=2.8
 description=Doe een analyse over de omgeving van een adres, perceel of punt. Ten opzichte van de verschillende vector lagen, die ingeladen zijn in het project  wordt een soort rapport gegenereerd wordt voor de meest nabije locatie. Het resultaat kan worden opslagen als een bestand dat je kan openen in MS word.
 
-version=0.8
+version=0.9
 author=Kay Warrie
 email=kaywarrie@gmail.com
 
@@ -33,7 +33,7 @@ homepage=http://www.milieuinfo.be/
 category=Plugins
 icon=img/icon.png
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False

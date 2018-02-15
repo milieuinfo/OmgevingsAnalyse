@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_OmgevingsAnalyseDlg.ui'
 #
-# Created: Tue Oct 25 17:36:14 2016
+# Created: Mon Feb 12 16:52:06 2018
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_OmgevingsAnalyseDlg(object):
     def setupUi(self, OmgevingsAnalyseDlg):
         OmgevingsAnalyseDlg.setObjectName(_fromUtf8("OmgevingsAnalyseDlg"))
-        OmgevingsAnalyseDlg.resize(481, 480)
+        OmgevingsAnalyseDlg.resize(570, 565)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/OmgevingsAnalyse/img/icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         OmgevingsAnalyseDlg.setWindowIcon(icon)
@@ -106,6 +106,27 @@ class Ui_OmgevingsAnalyseDlg(object):
         self.horizontalLayout_5.addWidget(self.outputBtn)
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
         self.inputGeomTabs.addTab(self.multiInputTab, _fromUtf8(""))
+        self.WKTtab = QtGui.QWidget()
+        self.WKTtab.setObjectName(_fromUtf8("WKTtab"))
+        self.verticalLayout_4 = QtGui.QVBoxLayout(self.WKTtab)
+        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.wktTxt = QtGui.QPlainTextEdit(self.WKTtab)
+        self.wktTxt.setMaximumSize(QtCore.QSize(16777215, 80))
+        self.wktTxt.setBaseSize(QtCore.QSize(0, 150))
+        self.wktTxt.setObjectName(_fromUtf8("wktTxt"))
+        self.verticalLayout_4.addWidget(self.wktTxt)
+        self.horizontalLayout_6 = QtGui.QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
+        self.label_7 = QtGui.QLabel(self.WKTtab)
+        self.label_7.setObjectName(_fromUtf8("label_7"))
+        self.horizontalLayout_6.addWidget(self.label_7)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_6.addItem(spacerItem)
+        self.wktLoadBtn = QtGui.QPushButton(self.WKTtab)
+        self.wktLoadBtn.setObjectName(_fromUtf8("wktLoadBtn"))
+        self.horizontalLayout_6.addWidget(self.wktLoadBtn)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_6)
+        self.inputGeomTabs.addTab(self.WKTtab, _fromUtf8(""))
         self.verticalLayout.addWidget(self.inputGeomTabs)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
@@ -161,6 +182,9 @@ class Ui_OmgevingsAnalyseDlg(object):
         self.label_4.setText(_translate("OmgevingsAnalyseDlg", "Attribuut met naam van de locatie:", None))
         self.outputBtn.setText(_translate("OmgevingsAnalyseDlg", "Output Folder", None))
         self.inputGeomTabs.setTabText(self.inputGeomTabs.indexOf(self.multiInputTab), _translate("OmgevingsAnalyseDlg", "Reeks geometrieën van laag", None))
+        self.label_7.setText(_translate("OmgevingsAnalyseDlg", "<html><head/><body><p><span style=\" font-style:italic;\">Ingevoerde WKT moet hetzelfde CRS als de kaart hebben.</span></p></body></html>", None))
+        self.wktLoadBtn.setText(_translate("OmgevingsAnalyseDlg", "Laden...", None))
+        self.inputGeomTabs.setTabText(self.inputGeomTabs.indexOf(self.WKTtab), _translate("OmgevingsAnalyseDlg", "Geometrie uit WTK", None))
         self.label_6.setText(_translate("OmgevingsAnalyseDlg", "Rapport Titel:", None))
         self.rapportTitleTxt.setText(_translate("OmgevingsAnalyseDlg", "Omgevingsrapport", None))
         self.selFeatsChk.setText(_translate("OmgevingsAnalyseDlg", " Selecteer de gevonden features op kaart", None))

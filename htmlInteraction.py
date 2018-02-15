@@ -48,8 +48,6 @@ class htmlInteraction(QObject):
         r.setColor(QColor(0, 0, 255))
         r.setFillColor(QColor(0, 0, 255, 50))
         r.setWidth(3)
-        #rec = geom.boundingBox()
-        #canvas.setExtent(rec)
 
         pt = geom.pointOnSurface().asPoint()
         m = QgsVertexMarker(canvas)
@@ -59,8 +57,12 @@ class htmlInteraction(QObject):
         m.setIconType(QgsVertexMarker.ICON_BOX)  
         m.setPenWidth(3)
 
-        self.moveMapTo( pt[0], pt[1], 0)
-        
+        if geom.type() == 3 or geom.type() == 2:
+           rec = geom.boundingBox()
+           canvas.setExtent(rec)
+        else:
+           self.moveMapTo( pt[0], pt[1], 0)
+
         self.graphics.append(r) 
         self.graphics.append(m) 
         self._refresh_layers()

@@ -27,7 +27,7 @@ def where(layer, exp):
             yield feature
 
 
-def addMarker(iface, pnt, clr=QColor(0, 255, 0), ico=QgsVertexMarker.ICON_BOX ):
+def addMarker(iface, pnt, clr=QColor(255, 255, 0), ico=QgsVertexMarker.ICON_BOX ):
     m = QgsVertexMarker(iface.mapCanvas())
     m.setCenter(pnt)
     m.setColor(clr)

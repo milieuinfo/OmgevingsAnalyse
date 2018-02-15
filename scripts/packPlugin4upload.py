@@ -3,7 +3,7 @@ import os, glob
 import zipfile
 
 
-PROJECT = "geopunt4Qgis"
+PROJECT = "Omgevings_Analyse_Rapport"
 INCLUDEFILE = ["*.py", "*.ui", "*.txt", "*.qrc", "*.md", "*.gif", "*.jpg", "*.png", "*.html", "*.qm", "*.json", "*.xml" ] 
 INCLUDEDIR = ["images","i18n","data","ext-libs"]
 
@@ -30,7 +30,7 @@ def main(src, target):
        os.remove(target)
     zipf = zipfile.ZipFile( target , 'w')
     zipdir( src , zipf)
-    print "zipped all deploy files in %s to %s" % ( src, target)
+    print( "zipped all deploy files in %s to %s" % ( src, target) )
     zipf.close() 
 
 if __name__ == '__main__':

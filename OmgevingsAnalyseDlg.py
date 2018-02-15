@@ -23,7 +23,7 @@
 import os, utils, json, settings
 from mapTool import mapTool, polyTool, lineTool
 from qgis.core import *
-from qgis.gui import QgsMessageBar
+from qgis.gui import QgsMessageBar, QgsRubberBand, QgsVertexMarker
 from ui_OmgevingsAnalyseDlg import Ui_OmgevingsAnalyseDlg
 from PyQt4 import QtGui, QtCore
 from rapportGenerator import rapportGenerator
@@ -31,7 +31,6 @@ from progressDlg import progressDlg
 
 class OmgevingsAnalyseDlg(QtGui.QDialog):
     def __init__(self, parent=None, iface=None):
-        """Constructor."""
         QtGui.QDialog.__init__(self, parent, QtCore.Qt.WindowTitleHint)
         self.iface = iface
 
@@ -62,7 +61,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self._initGui()
 
     #private
-    # noinspection PyUnresolvedReferences
     def _initGui(self):
         self.ui = Ui_OmgevingsAnalyseDlg()
         self.ui.setupUi(self)
@@ -75,6 +73,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.ui.manualLocationBtn.clicked.connect(self.pointLocationClicked)
         self.ui.lineLocationBtn.clicked.connect(self.lineLocationClicked)
         self.ui.polyLocationBtn.clicked.connect(self.polyLocationClicked)
+        self.ui.wktLoadBtn.clicked.connect(self.wtkClicked)
 
         self.ui.outputBtn.clicked.connect(self.getOutputFolder)
         self.ui.inputLayerCbx.currentIndexChanged.connect(self.inputLayerChanged)
@@ -83,21 +82,20 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.accepted.connect(self.generateRapport)
         self.rejected.connect(self._clearGraphicLayer)
 
-        QgsProject.instance().readProject.connect( self.loadSettings )
+        QgsProject.instance().readProject.connect(self.loadSettings )
         self.iface.newProjectCreated.connect(self.clear)
-        QgsProject.instance().writeProject.connect( self.saveSettings )
+        QgsProject.instance().writeProject.connect(self.saveSettings )
 
     def _pointLocationCallback(self, marker, point):
         """set location an and location name"""
-        xform = QgsCoordinateTransform( self.iface.mapCanvas().mapSettings().destinationCrs(), self.lam72)
+        xform = QgsCoordinateTransform(self.iface.mapCanvas().mapSettings().destinationCrs(), self.lam72)
 
         self.manualLoc_lam72 = QgsGeometry.fromPoint(point)
         self.manualLoc_lam72.transform(xform)
         self.manualLocationName = "{0:.2f} - {1:.2f}".format(point.x(), point.y())
 
         self.ui.manualLocationTxt.setText(self.manualLocationName)
-
-        self.flashMarker(marker)
+        self.graphicsLayer.append(marker)
 
         self.showNormal()
         self.activateWindow()
@@ -112,8 +110,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.manualLocationName = self.manualLoc_lam72.exportToWkt()
 
         self.ui.manualLocationTxt.setText(self.manualLocationName)
-
-        self.flashMarker(rubber)
+        self.graphicsLayer.append(rubber)
 
         self.showNormal()
         self.activateWindow()
@@ -128,8 +125,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.manualLocationName = self.manualLoc_lam72.exportToWkt()
 
         self.ui.manualLocationTxt.setText(self.manualLocationName)
-
-        self.flashMarker(rubber)
+        self.graphicsLayer.append(rubber)
 
         self.showNormal()
         self.activateWindow()
@@ -192,6 +188,32 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             lyr.setSelectedFeatures(ids)
 
     #events
+    def wtkClicked(self):
+       wktStr = self.ui.wktTxt.toPlainText()
+       geom = QgsGeometry.fromWkt(wktStr)
+       if geom is None: return
+
+       self.manualLoc_lam72 = geom
+       self.manualLocationName = wktStr
+
+       self.ui.manualLocationTxt.setText(wktStr)
+   
+       if geom.type() == QGis.Point: 
+          marker = QgsVertexMarker(self.iface.mapCanvas())
+          marker.setCenter( geom.asPoint() )
+          marker.setColor(QtGui.QColor(0, 255, 255))
+          marker.setIconSize(5)
+       else:
+          marker = QgsRubberBand(self.iface.mapCanvas(), geom.type() == QGis.Polygon )
+          marker.setToGeometry(geom , None)
+          marker.setColor(QtGui.QColor(0, 255, 255))
+          marker.setFillColor(QtGui.QColor(0, 255, 255, 100))
+          marker.setWidth(3)    
+       self._clearGraphicLayer()
+       self.graphicsLayer.append(marker)
+
+       self.ui.inputGeomTabs.setCurrentWidget(self.ui.drawInputTab)
+
     def inputLayerChanged(self):
         layerName = self.ui.inputLayerCbx.currentText()
         if len([l for l in self.mapLayers if l.name() == layerName ]):
@@ -246,15 +268,14 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             rowCount += 1
 
     def generateRapport(self):
-        if self.ui.inputGeomTabs.currentWidget().objectName() == "drawInputTab":
-            self.rapportFromDrawing()
-
         if self.ui.inputGeomTabs.currentWidget().objectName() == "multiInputTab":
             self.rapportFromFile()
+        else:
+            self.rapportFromDrawing()
 
     def getOutputFolder(self):
-        outputFolder = QtGui.QFileDialog.getExistingDirectory(self.iface.mainWindow(), "Kies output folder",
-                                                                                    self.s.rapportLocation)
+        outputFolder = QtGui.QFileDialog.getExistingDirectory(self.iface.mainWindow(),
+                                                      "Kies output folder", self.s.rapportLocation)
         self.s.rapportLocation = outputFolder
         self.ui.outPutTxt.setText(outputFolder)
 
@@ -275,9 +296,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         self.mapTool = lineTool(self.iface, self._lineLocationCallback)
         self.iface.mapCanvas().setMapTool(self.mapTool)
         self.showMinimized()
-
-    def flashMarker(self, mkr):
-        self.graphicsLayer.append(mkr)
 
     def rapportFromFile(self):
         #TODO wait dialog
@@ -320,7 +338,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
             rapport.save( os.path.join(self.s.rapportLocation, outName) )
 
     def rapportFromDrawing(self):
-        #wait dialog
         loc_lam72 = self.manualLoc_lam72
         title = self.manualLocationName
         graphics = self.graphicsLayer
@@ -333,10 +350,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
                              if self.ui.layerTbl.item(n, 0).checkState()]
         lyrs = [m for m in self.mapLayers if m.name() in checkedLayerNames]
 
-        #forms
         rapport = rapportGenerator(self.iface, rapportTitle, title, graphics)
-        #progress = progressDlg(None, self.iface, len(lyrs))
-        #progress.show()
 
         for lyr in lyrs:
             radius = [self.ui.layerTbl.cellWidget(n, 1) for n in range(self.ui.layerTbl.rowCount())
@@ -350,9 +364,7 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
 
             # find the intersecting records between loc and lyr and rec to raport
             self._findIntersectingRecords(loc, lyr, maxNum, radius, rapport)
-            #progress.update(None, lyr.name() )
 
-        #progress.close() 
         rapport.show()
         self.graphicsLayer = []
 
@@ -379,7 +391,6 @@ class OmgevingsAnalyseDlg(QtGui.QDialog):
         except ValueError:
             idx = -1
         if idx != -1: self.ui.titleCbx.setCurrentIndex(idx)
-
 
     def saveSettings(self):
         layerSettings = []
